@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Journal App Example</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    
+</head>
+
+
+
+
+<body>
+
+    <h1>New Entry</h1>
+    <div id="new_entry" v-on:remove-entry="removeEntry">
+        <div>
+            <span>Date</span>
+            <input type="date" v-model='date'/>
+        </div>
+        <div>
+            <span>Description</span>
+            <input type="text" v-model="description"/>
+        </div>
+        <p>Entries</p>
+        <entry v-for="item in entries" v-bind:key="item.id" v-bind:idx="item.id" v-bind:values="item.values" @remove-entry="removeEntry"></entry>
+        <button v-on:click="addEntry">+</button>
+        <button v-on:click="submitTransaction">record entry</button>
+        <!-- testing -->
+        <div>{{date}}</div>
+        <div>{{description}}</div>
+        <div>{{entries}}</div>
+    </div>
+   
+ 
+
+    <script>
+        Vue.component('entry',{
+            props: ["idx","values"],
+            methods: {
+                emitRemoval: function() {
+                    this.$emit("remove-entry",this.$props.idx);
+                }
+            },
+            template: `
+                <div>
+                    <input type='text' v-model='values.account'/>
+                    <select id='credit_debit' v-model='values.c_or_d'>
+                        <option value="debit">Debit</option>
+                        <option value="credit">Credit</option>
+                    </select>
+                    <input type='number' step='0.01' v-model='values.amount'/>
+                    <button v-on:click='emitRemoval'>-</button>
+                </div>
+            `
+        });
+
+        var new_entries = new Vue({
+            el: "#new_entry",
+            data: {
+                entries: [
+                    {id: 1, values: { account:"To Debit", c_or_d: "debit", amount: "0"} },
+                    {id: 2, values: { account:"To Credit", c_or_d: "credit",amount: "0"} }
+                ],
+                date: "",
+                description: "",
+            },
+            methods: {
+                addEntry: function() {
+                    var next_id = Math.max(...this.entries.map(item => item.id)) + 1;
+                    this.entries.push({id: next_id, values: {account: "", c_or_d:"credit", amount:"0"}} );
+                },
+                removeEntry: function(idx) {
+                    console.log(idx);
+                    if ( this.entries.length > 2) {
+                        this.entries = this.entries.filter(item => {
+                            return item.id !== idx;
+                        });
+                    } else {
+                        console.log('cant have less than 2');
+                    }
+                },
+                submitTransaction: function() {
+                    console.log(this.date);
+                    console.log(this.description);
+                    console.log(this.entries[0].values.account);
+                    this.entries.forEach( entry => {
+                        console.log(entry);
+                    });
+                    // validate -----
+                    // all entrie
+                }
+            }
+        });    
+    </script>
+</body>
+</html>
