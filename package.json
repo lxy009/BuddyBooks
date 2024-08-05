@@ -1,0 +1,22 @@
+{
+  "name": "buddybooks",
+  "version": "0.1.0",
+  "description": "headless accounting software",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lxy009/BuddyBooks.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lxy009/BuddyBooks/issues"
+  },
+  "homepage": "https://github.com/lxy009/BuddyBooks#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
