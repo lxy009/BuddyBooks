@@ -6,15 +6,18 @@ import time
 from uuid import uuid4
 import traceback
 
+
 import bottle
+from dotenv import load_dotenv
 
 
 #CONFIGS ---------------------------------------------------------------------
 
 PORT = 8888
-DATA_DIR = "data/"
-CONFIG_DIR = "configuration/"
-BUDGET_DIR = "budget/"
+load_dotenv()
+DATA_DIR = os.getenv('DATA_DIR')
+CONFIG_DIR = os.getenv('CONFIG_DIR')
+BUDGET_DIR = os.getenv('BUDGET_DIR')
 
 #PREPROCESSING ---------------------------------------------------------------
 
@@ -31,7 +34,7 @@ def get_files(dir):
 	return file_names, import_files
 	
 entry_files = os.listdir(DATA_DIR)
-entries = [json.load(open(DATA_DIR+x)) for x in entry_files]
+entries = [json.load(open(DATA_DIR+x)) for x in entry_files if x[0] != "."]
 
 configuration_files = os.listdir(CONFIG_DIR)
 configurations = [(json.load(open(CONFIG_DIR+x)),x) for x in configuration_files]
@@ -151,14 +154,15 @@ def add_new_entry_expense():
 	return 'success'
 
 @bottle.route('/view') #local host route default. next function will be run for this url request
-def income():
+def account_view():
     payment_method = bottle.request.query.cat if bottle.request.query.cat else legacy_config['payment_methods'][0]["value"]
 
     # for backwards compatibility -- future all configuration in separate json and with uuid
     label = next(o for o in legacy_config["payment_methods"] if o['value'] == payment_method)['label']
-    selected_view = [x for x in entries if x['payment_method'] == payment_method]
+    selected_view = [x for x in entries if 'payment_method' in x and x['payment_method'] == payment_method]
     selected_view.sort(key = lambda x: x["date"], reverse = False)
     for config in configurations:
+        print(config)
         if config[0]["type"] == "payment_method" and config[0]["value"] == payment_method:
             view_id = config[0]["id"]
             debt_payment = config[0]["debt_payment"]
