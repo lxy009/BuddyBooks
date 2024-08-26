@@ -2,39 +2,34 @@
 
 <html>
 <head>
-<!-- bootstrap -->
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <!-- Bootstrap and DataTables-->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/2.1.4/js/dataTables.js"></script>
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/2.1.4/js/dataTables.bootstrap4.js"></script>
 
-  <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
-  <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.11/css/jquery.dataTables.css">
-  <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.11/js/jquery.dataTables.js"></script>
-
-
-
-  <script>
-    $(document).ready(function() {
-	  var table = $('#data_content').DataTable({
-	    'columnDefs' : [{'targets':[0], 'visible' : false, 'searchable' : false }],
-		// "order": [[ 3, "asc" ]]
-        "ordering": false
-	  });
-	  $('#data_content tbody').on('click', 'tr' , function() {
-	    if( $(this).hasClass('selected') ){
-		  $(this).removeClass('selected');
-		  $('#entry_holder').text('');
-		}else{
-		  table.$('tr.selected').removeClass('selected');
-		  $(this).addClass('selected');
-		  id = table.row( this ).data()[0];
-		//   loadentry(id);
-		}
-	  });
-	});
-  </script>
+    <script>
+        $(document).ready(function() {
+        var table = $('#data_content').DataTable({
+            'columnDefs' : [{'targets':[0], 'visible' : false, 'searchable' : false }],
+            // "order": [[ 3, "asc" ]]
+            "ordering": false
+        });
+        $('#data_content tbody').on('click', 'tr' , function() {
+            if( $(this).hasClass('selected') ){
+                $(this).removeClass('selected');
+                $('#entry_holder').text('');
+            }else{
+                table.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+                id = table.row( this ).data()[0];
+                //   loadentry(id);
+            }
+        });
+        });
+    </script>
   <style>
     * {
 	  font-family: Arial, sans-serif;
@@ -70,9 +65,11 @@
         justify-content: space-between;
     }
   </style>
-    <script>
+    <script>    
         var global = {};
         global.debt_payment = {{initial_debt_payment}};
+        global.api_endpoint = "entry";
+        global.entries = [];
 
         var the_data = []
         % for item in items:
@@ -83,6 +80,25 @@
                 "payoff_value": {{item['payoff_value'] if 'payoff_type' in item else 0}}
             })
         % end
+
+        fetch(global.api_endpoint+"?cat={{value_selected}}") // future needs to be template-less
+        .then( response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error, status = ${response.status}`);
+            }
+            return response.json();
+        })
+        .then( data => {
+          global.entries = data.data;
+          global.running = [0] //future will be start value
+        })
+        .catch( (error) => {
+            console.log("error");
+            console.log(error);
+        })
+
+        console.log(global)
+        console.log(the_data)
 
         var update_numbers = function(id, value) {
             for(var i = 0; i < the_data.length; i++){
@@ -105,9 +121,16 @@
             sum_and_update();           
         }
 
+        // var as_accounting = function(x){
+        //     return "<div class='accounting'><div>$ &nbsp;</div><div>" +
+        //         x.toFixed(2) + "</div></div>"
+        // }
+
         var as_accounting = function(x){
-            return "<div class='accounting'><div>$ &nbsp;</div><div>" +
-                x.toFixed(2) + "</div></div>"
+        var class_name = x < 0 ? " class='negative' " : ""
+        return "<div class='accounting'><div>$ &nbsp;</div><div" + class_name + ">" +
+            x.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + 
+            "</div></div>"
         }
 
         var sum_and_update = function() {
@@ -329,31 +352,87 @@
 		</thead>
 		<tbody>
 		  %for item in items:
-		  <tr>
-            <td>{{item['id']}}</td>
-            <td>${{item['show']['cum']}}</td>
-            <td>${{item['show']['bal']}}</td>
-            <td>{{item['date']}}</td>
-            <td>{{item['item']}}</td>
-            <td>${{item['show']['amt']}}</td>
-            <td>{{item['category']}}</td>
-            <td>{{item['notes']}}</td>
-            <td>
-                <select data-id="{{item['id']}}" class="payment_type" name='payment_type' onchange='highlight_row(this)'>
-                    <option value='none'></option>
-                    <option value='full'>Full</option>
-                    <option value='partial'>Partial</option>
-                    <option value='interest'>Interest</option>
-                    <option value='full_extra'>Full Extra</option>
-                    <option value='partial_extra'>Partial Extra</option>
-                </select>
-            </td>
-            <td><input data-id="{{item['id']}}" class="payment_amount" type='number' name='payment_amount' step='0.01' onchange='update_partial(this)'></td>
-          </tr>
+		  <!-- <tr data-id="{{item['id']}}" onclick="edit_entry(this)"> -->
+            <tr data-entryid="{{item['id']}}" onclick="edit_entry(this)">
+                <td>{{item['id']}}</td>
+                <td>${{item['show']['cum']}}</td>
+                <td>${{item['show']['bal']}}</td>
+                <td>{{item['date']}}</td>
+                <td>{{item['item']}}</td>
+                <td>${{item['show']['amt']}}</td>
+                <td>{{item['category']}}</td>
+                <td>{{item['notes']}}</td>
+                <td>
+                    <select data-id="{{item['id']}}" class="payment_type" name='payment_type' onchange='highlight_row(this)'>
+                        <option value='none'></option>
+                        <option value='full'>Full</option>
+                        <option value='partial'>Partial</option>
+                        <option value='interest'>Interest</option>
+                        <option value='full_extra'>Full Extra</option>
+                        <option value='partial_extra'>Partial Extra</option>
+                    </select>
+                </td>
+                <td><input data-id="{{item['id']}}" class="payment_amount" type='number' name='payment_amount' step='0.01' onchange='update_partial(this)'></td>
+            </tr>
 		  %end
 		</tbody>
 	  </table>
   </div>
+
+
+    <!-- Edit Entry Modal -->
+    <div class="modal fade" id="edit_modal" tabindex="-1" role="dialog" aria-labelledby="edit_modal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content"><!-- <form id='edit_entry'> -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="edit_modal_title">Edit Entry</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="edit_modal_content">
+                json goes here.
+                <!-- <div class="row_form">
+                <span>Type:</span>
+                <select id="edit_entry_type" name="type">
+                    <option value=""></option>
+                    <option value="deposit">deposit</option>
+                    <option value="category_bucket">category bucket</option>
+                    <option value="other_bucket">other bucket</option>
+                    <option value="direct">direct debit</option>
+                </select>
+                </div>
+                <div class="row_form">
+                    <span>Amount:</span>
+                    <input id="edit_amount" type='number' name='amount' value="0" step="0.01" />
+                </div>
+                <div class="row_form">
+                    <span>Date:</span>
+                    <input id="edit_date" type='date' name='date' />
+                </div>
+                <div class="row_form">
+                    <span>Item:</span>
+                    <div id="edit_input_item"><input class="text_input" type='text' name='item' /></div>
+                </div>
+                <div class="row_form">
+                    <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="edit_in_flight_toggle" name="in_flight">
+                    <label class="custom-control-label" for="edit_in_flight_toggle">In Flight</label>
+                    </div>
+                </div> -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" onclick="del_entry()">Delete</button>
+                <input type="submit" class="btn btn-primary" value="Submit"/>
+            </div>
+            <!-- </form> --></div>
+        </div>
+    </div>
+
+
+
+
   <script>
     sum_and_update()
     // console.log(the_data);
@@ -370,6 +449,53 @@
             highlight_row(the_select);
             doms_to_update[1].value = the_data[i].payoff_value;
         }
+    }
+  </script>
+  <script>
+    function edit_entry(event){
+        // console.log(event.tagName)
+        console.log(event.dataset.entryid)
+        global.current_id = event.dataset.entryid
+        entry = global.entries.find( elem => elem.id ==  global.current_id)
+        console.log(entry)
+        $('#edit_modal').modal('show');
+        // $('#edit_entry_type').val(entry.type)
+        // $('#edit_amount').val(entry.amount)
+        // $('#edit_date').val(entry.date)
+        // change_edit_input({"target": {"value": entry.type}}, entry.item)
+        // $('#edit_in_flight_toggle').prop( "checked", entry.in_flight)
+    }
+
+    function del_entry(){
+        console.log("DELETING")
+        const url = global.api_endpoint + "/" + global.current_id;
+        fetch(url, {
+            method: "DELETE"
+        })
+        .then( response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error, status = ${response.status}`);
+            }
+            window.location.reload();
+            // $('#edit_modal').modal('hide');
+            // $('#budget_edit')[0].reset();
+            // change_edit_input({"target": {"value": "reset"}})
+            return ""
+        })
+        .then( data => {
+            console.log(data);
+
+            // global.entries.push(payload)
+            // var idx = global.entries.findIndex(elem => elem.id == global.current_id)
+            // global.entries.splice( idx, 1)
+            // // create_view()
+            // global.current_id = "";
+        })
+        .catch( (error) => {
+            console.log("error");
+            console.log(error);
+            $('#edit_modal_content').text(error);
+        })
     }
   </script>
 </body>
