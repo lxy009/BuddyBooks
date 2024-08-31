@@ -44,6 +44,8 @@ budget_files, budget_entries = get_files(BUDGET_DIR)
 for entry in budget_entries:
 	if 'in_flight' not in entry:
 		entry['in_flight']= False
+	if 'entry' not in entry:
+		entry['entry'] = entry['amount']
 
 #process form into right data types
 def process_form_data(entry_form):
