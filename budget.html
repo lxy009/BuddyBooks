@@ -8,26 +8,6 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
-  <script>
-    // $(document).ready(function() {
-	//   var table = $('#data_content').DataTable({
-	//     'columnDefs' : [{'targets':[0], 'visible' : false, 'searchable' : false }],
-	// 	// "order": [[ 3, "asc" ]]
-    //     "ordering": false
-	//   });
-	//   $('#data_content tbody').on('click', 'tr' , function() {
-	//     if( $(this).hasClass('selected') ){
-	// 	  $(this).removeClass('selected');
-	// 	  $('#entry_holder').text('');
-	// 	}else{
-	// 	  table.$('tr.selected').removeClass('selected');
-	// 	  $(this).addClass('selected');
-	// 	  id = table.row( this ).data()[0];
-	// 	//   loadentry(id);
-	// 	}
-	//   });
-	// });
-  </script>
   <style>
     * {
 	    font-family: Arial, sans-serif;
@@ -53,33 +33,6 @@
     .in_flight {
       background: yellow;
     }
-	/* #new_entry div.label {
-	  display: inline-block;
-	  width: 100px;
-	  text-align: right;
-	  padding-right: 5px;
-	}
-	#table_holder {
-	  width: 80%;
-	  margin-left: auto;
-	  margin-right: auto;
-	}
-    #payment_calculations {
-        display: flex;
-        justify-content: space-evenly;
-    }
-    #payment_calculations td {
-        padding-left: 16px;
-        padding-right: 16px;
-    }
-    .payment_amount {
-        display: none;
-    }
-
-    #action_panel {
-        display: flex;
-        justify-content: space-between;
-    } */
   </style>
     <script>
         var global = {};
@@ -88,30 +41,6 @@
         global.api_del = global.api_add + "/";
         global.api_update = global.api_del;
         global.the_data = [];
-  
-        // update function on cumulative
-        
-
-        // var update_numbers = function(id, value) {
-        //     for(var i = 0; i < the_data.length; i++){
-        //         if( the_data[i].id == id) {
-        //             the_data[i].payoff_type = value
-        //             break;
-        //         }
-        //     }
-        //     sum_and_update();
-        // };
-        
-        // var update_partial = function(obj) {
-        //     for(var i = 0; i < the_data.length; i++){
-        //         if( the_data[i].id == obj.dataset.id) {
-        //             // the_data[i].payoff_type = value
-        //             the_data[i].payoff_value = Number(obj.value);
-        //             break;
-        //         }
-        //     }
-        //     sum_and_update();           
-        // }
 
       var as_accounting = function(x){
         var class_name = x < 0 ? " class='negative' " : ""
@@ -119,174 +48,11 @@
             x.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + 
             "</div></div>"
       }
-
-        // var sum_and_update = function() {
-        //     sums = [0,0,0, 0, 0]
-        //     the_data.forEach( datum => {
-        //         switch (datum.payoff_type) {
-        //             case 'interest':
-        //                 sums[0] += datum.bal;
-        //                 break
-        //             case 'full_extra':
-        //                 sums[1] += datum.bal;
-        //                 break
-        //             case 'partial_extra':
-        //                 sums[2] += datum.payoff_value;
-        //                 break
-        //             case 'full':
-        //                 sums[3] += datum.bal;
-        //                 break
-        //             case 'partial':
-        //                 sums[4] += datum.payoff_value;
-        //                 break
-        //             default:
-        //                 break
-        //         }
-        //     })
-        //     document.getElementById("total_interest").innerHTML = as_accounting(sums[0]);
-        //     document.getElementById("total_full_extra").innerHTML = as_accounting(sums[1]);
-        //     document.getElementById("total_partial_extra").innerHTML = as_accounting(sums[2]);
-        //     document.getElementById("total_debt").innerHTML = as_accounting(global.debt_payment);
-        //     document.getElementById("debt_sans_full_extra").innerHTML = as_accounting(global.debt_payment - sums[0]);
-        //     document.getElementById("debt_sans_all_extra").innerHTML = as_accounting(global.debt_payment - sums[0] - sums[1]);
-        //     document.getElementById("debt_check").innerHTML = as_accounting(global.debt_payment - sums[0] - sums[1] - sums[2]);
-
-        //     document.getElementById("total_full").innerHTML = as_accounting(sums[3]);
-        //     document.getElementById("total_partial").innerHTML = as_accounting(sums[4]);
-        //     document.getElementById("total_total").innerHTML = as_accounting(sums[3] + sums[4]);
-        // };
-    </script>
-    <script>
-        // var highlight_row = function(obj) {
-        //     var row = obj.parentNode.parentNode;
-        //     var pay_amt = obj.parentNode.nextElementSibling.firstElementChild;
-        //     switch (obj.value) {
-        //         case 'full':
-        //             row.style.background = "red";
-        //             pay_amt.style.display= "none";
-        //             break;
-        //         case 'partial':
-        //             row.style.background = "green";
-        //             pay_amt.style.display= "block";
-        //             break;
-        //         case 'interest':
-        //             row.style.background = "cornflowerblue";
-        //             pay_amt.style.display= "none";
-        //             break;
-        //         case 'full_extra':
-        //             row.style.background = "darkorange";
-        //             pay_amt.style.display= "none";
-        //             break;
-        //         case 'partial_extra':
-        //             row.style.background = "cyan";
-        //             pay_amt.style.display= "block";
-        //             break;
-        //         default:
-        //             row.style.background = "none";
-        //             pay_amt.style.display= "none";
-        //             break;
-        //     }
-        //     update_numbers(obj.dataset.id, obj.value);
-        // }
-
-        // var submit_change = function() {
-
-        //     event.preventDefault();
-
-        //     const mthd = "{{value_selected}}";
-        //     const lbl = "{{selected}}";
-        //     const view_id = "{{view_id}}"
-        //     const amt = Number(document.getElementById("debt_value").value);
-
-        //     global.debt_payment = amt;
-        //     sum_and_update()
-
-        //     const request = new XMLHttpRequest();
-        //     const url = "/update_debt_payment";
-
-        //     const payload = JSON.stringify({
-        //         "debt_payment": amt,
-        //         "value": mthd,
-        //         "label": lbl,
-        //         "id": view_id,
-        //         "type": "payment_method"
-        //     });
-
-        //     request.open("POST", url, true);
-        //     request.setRequestHeader("Content-Type", "application/json;charset=UTF-8")
-            
-
-
-        //     request.onerror = (e) => {
-        //         console.log('error');
-        //         // status_marker.innerHTML = 'failure';
-        //         // status_marker.className = "badge badge-danger";
-        //         // setTimeout( () => {
-        //         //     status_marker.innerHTML = '';
-        //         //     status_marker.className = "";
-        //         // }, 3000);
-        //     };
-
-        //     request.onload = (e) => {
-        //         if (e.currentTarget.status != 200) {
-        //             console.log('error');
-        //             // status_marker.innerHTML = 'failure: status code = ' + e.currentTarget.status;
-        //             // status_marker.className = "badge badge-danger";  
-        //         } else {
-        //             // status_marker.innerHTML = 'success';
-        //             // status_marker.className = "badge badge-success";        
-        //             // form.reset(); // but doesn't update category though - so run function manually?
-        //             // other_income_forms();
-        //             // other_forms();
-        //             // window.location.reload();
-        //             console.log('success')
-        //         }
-
-        //         // setTimeout( () => {
-        //         //     status_marker.innerHTML = '';
-        //         //     status_marker.className = "";
-        //         // }, 3000);
-        //     };
-
-
-        //     request.send(payload);
-        // }
-
-        // var submit_plan = function() {
-
-        //     event.preventDefault();
-
-        //     const request = new XMLHttpRequest();
-        //     const url = "/update_payment_plan";
-
-        //     const payload = JSON.stringify(the_data, null, 3);
-
-        //     request.open("POST", url, true);
-        //     request.setRequestHeader("Content-Type", "application/json;charset=UTF-8")
-
-
-        //     request.onerror = (e) => {
-        //         console.log('error');
-        //     };
-
-        //     request.onload = (e) => {
-        //         if (e.currentTarget.status != 200) {
-        //             console.log('error');
-        //         } else {
-        //             console.log('success')
-        //         }
-        //     };
-
-        //     request.send(payload);
-        //     }
     </script>
 </head>
 <body>
   <a href='/'>Home</a>
   <div id="action_panel">
-    <!-- <button class="btn btn-success" type="button" data-toggle="collapse" data-target="#add_item" aria-expanded="false" aria-controls="add_item">
-        Add
-    </button> -->
     <button class="btn btn-success" type="button" data-toggle="modal" data-target="#add_modal">
       Add Budget Entry
     </button>
@@ -294,31 +60,7 @@
     <button class="btn btn-success" type="button">Clean up</button>
     <button class="btn btn-success" type="button">save</button> 
     <p>or control-s</p>
-    <!-- <button class="btn btn-success" type="button">
-        Submit Payment Plan
-    </button> -->
   </div>
-    <!-- <div id="add_item" class="collapse">
-        % include('add_entry_module.tpl', config = config)
-    </div> -->
-  <!-- <div>
-    <div>Debt payment amount:</div>
-    <input id="debt_value" class="debt_payment" type='number' name='debt_payment' step='0.01' value='{{initial_debt_payment}}'/>
-    <button id="change_debt_payment" onclick="submit_change()">change</button>
-  </div> -->
-  <!-- <div id="payment_calculations">
-    <table id="deb_payment_summary"><tbody>
-            <tr style='background-color:cornflowerblue;'><td id='total_interest'></td><td>Interest</td><td id="amt_interest"></td><td id="total_debt"></td></tr>
-            <tr style='background-color:darkorange;'><td id='total_full_extra'></td><td>Full Extra</td><td id="amt_full_extra"></td><td id="debt_sans_full_extra"></td></tr>
-            <tr style='background-color:cyan;'><td id='total_partial_extra'></td><td>Partial Extra</td><td id="amt_partial_extra"></td><td id="debt_sans_all_extra"></td></tr>
-            <tr><td></td><td></td><td></td><td id="debt_check"></td></tr>
-    </tbody></table>
-    <table id="payment_summary"><tbody>
-        <tr style='background-color:red;'><td id='total_full'></td><td>Full</td></tr>
-        <tr style='background-color:green;'><td id='total_partial'></td><td>Partial</td></tr>
-        <tr><td id='total_total'></td><td></td></tr>
-    </tbody></table>
-  </div> -->
   <div id='table_holder' class="container">
 	  <table id='data_content' class='table table-sm table-hover'>
 		<tbody>

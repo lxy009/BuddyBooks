@@ -6,15 +6,18 @@ import time
 from uuid import uuid4
 import traceback
 
+
 import bottle
+from dotenv import load_dotenv
 
 
 #CONFIGS ---------------------------------------------------------------------
 
 PORT = 8888
-DATA_DIR = "data/"
-CONFIG_DIR = "configuration/"
-BUDGET_DIR = "budget/"
+load_dotenv()
+DATA_DIR = os.getenv('DATA_DIR')
+CONFIG_DIR = os.getenv('CONFIG_DIR')
+BUDGET_DIR = os.getenv('BUDGET_DIR')
 
 #PREPROCESSING ---------------------------------------------------------------
 
@@ -31,7 +34,7 @@ def get_files(dir):
 	return file_names, import_files
 	
 entry_files = os.listdir(DATA_DIR)
-entries = [json.load(open(DATA_DIR+x)) for x in entry_files]
+entries = [json.load(open(DATA_DIR+x)) for x in entry_files if x[0] != "."]
 
 configuration_files = os.listdir(CONFIG_DIR)
 configurations = [(json.load(open(CONFIG_DIR+x)),x) for x in configuration_files]
@@ -71,6 +74,7 @@ def index():
 def budget_html():
     return bottle.static_file('budget.html', root='./')
 
+# VIEW BUDGET
 @bottle.route('/budget')
 def get_budget():
 	bottle.response.headers['Content-Type'] = 'application/json'
@@ -80,6 +84,7 @@ def get_budget():
 		"data": budget_entries
     })
 
+# ADD BUDGET ENTRY
 @bottle.post('/budget_entry')
 def add_budget_entry():
 	data = bottle.request.json
@@ -93,6 +98,7 @@ def add_budget_entry():
 	bottle.response.headers['Content-Type'] = 'application/json'
 	return json.dumps({'id': new_id})
 
+# EDIT BUDGET ENTRY
 @bottle.put('/budget_entry/<id>')
 def update_budget_entry(id):
     ids = [x["id"] for x in budget_entries]
@@ -118,6 +124,7 @@ def update_budget_entry(id):
     bottle.response.headers['Content-Type'] = 'application/json'
     return	json.dumps({"id": id})
 
+# DELETE BUDGET ENTRY
 @bottle.delete('/budget_entry/<id>')
 def delete_budget_entry(id):
 	ids = [x["id"] for x in budget_entries]
@@ -133,6 +140,35 @@ def delete_budget_entry(id):
 		return
 	return
 
+# GET EXPENSE ENTRIES
+@bottle.get('/entry')
+def get_entries():
+    payment_method = bottle.request.query.cat if bottle.request.query.cat else legacy_config['payment_methods'][0]["value"]
+
+    # for backwards compatibility -- future all configuration in separate json and with uuid
+    # label = next(o for o in legacy_config["payment_methods"] if o['value'] == payment_method)['label']
+    selected_view = [x for x in entries if 'payment_method' in x and x['payment_method'] == payment_method]
+    selected_view.sort(key = lambda x: x["date"], reverse = False)
+
+    running = 0
+    for obj in selected_view:
+        running = running + obj['balance']
+        obj['cumulative'] = running
+        obj['show'] = {
+            "cum": "{:.2f}".format(obj['cumulative']),
+			"bal": "{:.2f}".format(obj['balance']),
+			"amt": "{:.2f}".format(obj['amount']),
+        }
+
+    # print(json.dumps(selected_view,indent = 3))
+	
+    bottle.response.headers['Content-Type'] = 'application/json'
+    bottle.response.headers['Cache-Control'] = 'no-cache'
+    return json.dumps({
+		"data": selected_view
+    })
+
+# ADD EXPENSE ENTRY --- should be modified to be generic for income/expense
 @bottle.post('/add_entry')
 def add_new_entry_expense():
 	entry_form = bottle.request.forms
@@ -150,15 +186,32 @@ def add_new_entry_expense():
         # add things to make sure file is not written if error with pushing to data and vice versa
 	return 'success'
 
+# DELETE EXPENSE ENTRY
+@bottle.delete('/entry/<id>')
+def delete_entry(id):
+	ids = [x["id"] for x in entries]
+	try:
+		if id not in ids:
+			raise KeyError
+		idx = ids.index(id)
+		# should be more thorough, keep the entry and add back in case issues with pop or rmeoving file
+		entries.pop(idx) 
+		os.remove(DATA_DIR+id+".json")
+	except KeyError:
+		bottle.response.status = 404
+		return
+	return
+
 @bottle.route('/view') #local host route default. next function will be run for this url request
-def income():
+def account_view():
     payment_method = bottle.request.query.cat if bottle.request.query.cat else legacy_config['payment_methods'][0]["value"]
 
     # for backwards compatibility -- future all configuration in separate json and with uuid
     label = next(o for o in legacy_config["payment_methods"] if o['value'] == payment_method)['label']
-    selected_view = [x for x in entries if x['payment_method'] == payment_method]
+    selected_view = [x for x in entries if 'payment_method' in x and x['payment_method'] == payment_method]
     selected_view.sort(key = lambda x: x["date"], reverse = False)
     for config in configurations:
+        # print(config)
         if config[0]["type"] == "payment_method" and config[0]["value"] == payment_method:
             view_id = config[0]["id"]
             debt_payment = config[0]["debt_payment"]
@@ -180,7 +233,7 @@ def income():
 			"amt": "{:.2f}".format(obj['amount']),
         }
 
-    print(json.dumps(selected_view,indent = 3))
+    # print(json.dumps(selected_view,indent = 3))
     return bottle.template(
 		'test',
 		items = selected_view, 
@@ -204,9 +257,10 @@ def update_debt_payment():
 			json.dump(data, file, ensure_ascii=False, indent = 4)
 	else:
 		data["id"] = str(uuid4())
-		configurations.append(data)
+		filename = data["id"] + ".json"
+		configurations.append( (data, filename) )
 		# this writes a file even if error - should not do this in future
-		with open(CONFIG_DIR + data["id"] + ".json", 'w') as file:
+		with open(CONFIG_DIR + filename, 'w') as file:
 			json.dump(data, file, ensure_ascii=False, indent = 4)
 	
 	return 'success'
