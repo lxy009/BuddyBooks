@@ -12,23 +12,29 @@
 
     <script>
         $(document).ready(function() {
-        var table = $('#data_content').DataTable({
-            'columnDefs' : [{'targets':[0], 'visible' : false, 'searchable' : false }],
-            // "order": [[ 3, "asc" ]]
-            "ordering": false,
-            "paging": false
-        });
-        $('#data_content tbody').on('click', 'tr' , function() {
-            if( $(this).hasClass('selected') ){
-                $(this).removeClass('selected');
-                $('#entry_holder').text('');
-            }else{
-                table.$('tr.selected').removeClass('selected');
-                $(this).addClass('selected');
-                id = table.row( this ).data()[0];
-                //   loadentry(id);
-            }
-        });
+            // DataTable initialization
+            var table = $('#data_content').DataTable({
+                'columnDefs' : [{'targets':[0], 'visible' : false, 'searchable' : false }],
+                // "order": [[ 3, "asc" ]]
+                "ordering": false,
+                "paging": false
+            });
+            // this is for highlighting?
+            $('#data_content tbody').on('click', 'tr' , function() {
+                if( $(this).hasClass('selected') ){
+                    $(this).removeClass('selected');
+                    $('#entry_holder').text('');
+                }else{
+                    table.$('tr.selected').removeClass('selected');
+                    $(this).addClass('selected');
+                    id = table.row( this ).data()[0];
+                    //   loadentry(id);
+                }
+            });
+            // navigating different account via select
+            $('#payment_method').change( function(e) {
+                window.location.href = "view?cat=" + $('#payment_method option:selected').attr('value');
+            })
         });
     </script>
   <style>
@@ -300,12 +306,13 @@
 <body>
   <a href='/'>Home</a>
   <div>
-    <!-- <select id='payment_method' name='payment_method'> -->
+    <select id='payment_method' name='payment_method'>
+        <option>Choose Account</option>
         %for item in config['payment_methods']:
-        <a class="btn btn-primary" href="view?cat={{item['value']}}">{{item['label']}}</a>
-        <!-- <option value='{{item['value']}}'>{{item['label']}}</option> -->
+        <!-- <a class="btn btn-primary" href="view?cat={{item['value']}}">{{item['label']}}</a> -->
+        <option value='{{item['value']}}'>{{item['label']}}</option>
         %end
-    <!-- </select> -->
+    </select>
   </div>
   <div>
     <div class="sticky_panel">
@@ -456,6 +463,7 @@
             doms_to_update[1].value = the_data[i].payoff_value;
         }
     }
+
   </script>
   <script>
     function edit_entry(event){
