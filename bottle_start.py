@@ -160,7 +160,7 @@ def get_entries():
 			"amt": "{:.2f}".format(obj['amount']),
         }
 
-    print(json.dumps(selected_view,indent = 3))
+    # print(json.dumps(selected_view,indent = 3))
 	
     bottle.response.headers['Content-Type'] = 'application/json'
     bottle.response.headers['Cache-Control'] = 'no-cache'
@@ -211,7 +211,7 @@ def account_view():
     selected_view = [x for x in entries if 'payment_method' in x and x['payment_method'] == payment_method]
     selected_view.sort(key = lambda x: x["date"], reverse = False)
     for config in configurations:
-        print(config)
+        # print(config)
         if config[0]["type"] == "payment_method" and config[0]["value"] == payment_method:
             view_id = config[0]["id"]
             debt_payment = config[0]["debt_payment"]
@@ -233,7 +233,7 @@ def account_view():
 			"amt": "{:.2f}".format(obj['amount']),
         }
 
-    print(json.dumps(selected_view,indent = 3))
+    # print(json.dumps(selected_view,indent = 3))
     return bottle.template(
 		'test',
 		items = selected_view, 
@@ -257,9 +257,10 @@ def update_debt_payment():
 			json.dump(data, file, ensure_ascii=False, indent = 4)
 	else:
 		data["id"] = str(uuid4())
-		configurations.append(data)
+		filename = data["id"] + ".json"
+		configurations.append( (data, filename) )
 		# this writes a file even if error - should not do this in future
-		with open(CONFIG_DIR + data["id"] + ".json", 'w') as file:
+		with open(CONFIG_DIR + filename, 'w') as file:
 			json.dump(data, file, ensure_ascii=False, indent = 4)
 	
 	return 'success'
