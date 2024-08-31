@@ -35,6 +35,12 @@
     * {
 	  font-family: Arial, sans-serif;
 	}
+    .sticky_panel {
+        position: sticky;
+        top: 0px;
+        background-color: white;
+        z-index: 1;
+    }
 	#new_entry div.label {
 	  display: inline-block;
 	  width: 100px;
@@ -46,14 +52,6 @@
 	  margin-left: auto;
 	  margin-right: auto;
 	}
-    #payment_calculations {
-        display: flex;
-        justify-content: space-evenly;
-    }
-    #payment_calculations td {
-        padding-left: 16px;
-        padding-right: 16px;
-    }
     .payment_amount {
         display: none;
     }
@@ -63,7 +61,11 @@
     }
     #action_panel {
         display: flex;
-        justify-content: space-between;
+        justify-content: space-around;
+        align-items: center;
+    }
+    table.summary_amounts td {
+        padding: 2px 16px;
     }
   </style>
     <script>    
@@ -305,80 +307,82 @@
         %end
     <!-- </select> -->
   </div>
-  <h1>{{selected}}</h1>
-  <div id="action_panel">
-    <button class="btn btn-success" type="button" data-toggle="collapse" data-target="#add_item" aria-expanded="false" aria-controls="add_item">
-        Add
-    </button>
-    <button class="btn btn-success" type="button" onclick='submit_plan()'>
-        Submit Payment Plan
-    </button>
-  </div>
-    <div id="add_item" class="collapse">
-        % include('add_entry_module.tpl', config = config)
-    </div>
   <div>
-    <div>Debt payment amount:</div>
-    <input id="debt_value" class="debt_payment" type='number' name='debt_payment' step='0.01' value='{{initial_debt_payment}}'/>
-    <button id="change_debt_payment" onclick="submit_change()">change</button>
-  </div>
-  <div id="payment_calculations">
-    <table id="deb_payment_summary"><tbody>
-            <tr style='background-color:cornflowerblue;'><td id='total_interest'></td><td>Interest</td><td id="amt_interest"></td><td id="total_debt"></td></tr>
-            <tr style='background-color:darkorange;'><td id='total_full_extra'></td><td>Full Extra</td><td id="amt_full_extra"></td><td id="debt_sans_full_extra"></td></tr>
-            <tr style='background-color:cyan;'><td id='total_partial_extra'></td><td>Partial Extra</td><td id="amt_partial_extra"></td><td id="debt_sans_all_extra"></td></tr>
-            <tr><td></td><td></td><td></td><td id="debt_check"></td></tr>
-    </tbody></table>
-    <table id="payment_summary"><tbody>
-        <tr style='background-color:red;'><td id='total_full'></td><td>Full</td></tr>
-        <tr style='background-color:green;'><td id='total_partial'></td><td>Partial</td></tr>
-        <tr><td id='total_total'></td><td></td></tr>
-    </tbody></table>
-  </div>
-  <div id='table_holder'>
-	  <table id='data_content' class='table table-striped table-sm table-hover'>
-		<thead>
-		  <tr>
-             <th>ID</th>
-             <th>Total</th>
-             <th>Balance</th>
-             <th>Date</th>
-             <th>Item</th>
-             <th>Amount</th>
-             <th>Category</th>
-             <th>Notes</th>
-             <th>Payment Type</th>
-             <th>Payment Amount</th>
-        </tr>
-		</thead>
-		<tbody>
-		  %for item in items:
-		  <!-- <tr data-id="{{item['id']}}" onclick="edit_entry(this)"> -->
-            <!-- <tr data-entryid="{{item['id']}}" onclick="edit_entry(this)"> -->
+    <div class="sticky_panel">
+        <h1>{{selected}}</h1>
+        <div id="action_panel">
+            <button class="btn btn-success" type="button" data-toggle="collapse" data-target="#add_item" aria-expanded="false" aria-controls="add_item">
+                Add
+            </button>
+            <table id="debt_payment_summary" class="summary_amounts"><tbody>
+                <tr style='background-color:cornflowerblue;'><td id='total_interest'></td><td>Interest</td><td id="amt_interest"></td><td id="total_debt"></td></tr>
+                <tr style='background-color:darkorange;'><td id='total_full_extra'></td><td>Full Extra</td><td id="amt_full_extra"></td><td id="debt_sans_full_extra"></td></tr>
+                <tr style='background-color:cyan;'><td id='total_partial_extra'></td><td>Partial Extra</td><td id="amt_partial_extra"></td><td id="debt_sans_all_extra"></td></tr>
+                <tr><td></td><td></td><td></td><td id="debt_check"></td></tr>
+            </tbody></table>
+            <table id="payment_summary" class="summary_amounts"><tbody>
+                <tr style='background-color:red;'><td id='total_full'></td><td>Full</td></tr>
+                <tr style='background-color:green;'><td id='total_partial'></td><td>Partial</td></tr>
+                <tr><td id='total_total'></td><td></td></tr>
+            </tbody></table>    
+            <button class="btn btn-success" type="button" onclick='submit_plan()'>
+                Submit Payment Plan
+            </button>
+        </div>
+        <div id="add_item" class="collapse">
+            % include('add_entry_module.tpl', config = config)
+        </div>
+        <div >
+            <div>Debt payment amount:</div>
+            <input id="debt_value" class="debt_payment" type='number' name='debt_payment' step='0.01' value='{{initial_debt_payment}}'/>
+            <button id="change_debt_payment" onclick="submit_change()">change</button>
+        </div>
+    </div>
+    <div id='table_holder'>
+        <table id='data_content' class='table table-striped table-sm table-hover'>
+            <thead>
             <tr>
-                <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['id']}}</td>
-                <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">${{item['show']['cum']}}</td>
-                <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">${{item['show']['bal']}}</td>
-                <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['date']}}</td>
-                <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['item']}}</td>
-                <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">${{item['show']['amt']}}</td>
-                <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['category']}}</td>
-                <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['notes']}}</td>
-                <td>
-                    <select data-id="{{item['id']}}" class="payment_type" name='payment_type' onchange='highlight_row(this)'>
-                        <option value='none'></option>
-                        <option value='full'>Full</option>
-                        <option value='partial'>Partial</option>
-                        <option value='interest'>Interest</option>
-                        <option value='full_extra'>Full Extra</option>
-                        <option value='partial_extra'>Partial Extra</option>
-                    </select>
-                </td>
-                <td><input data-id="{{item['id']}}" class="payment_amount" type='number' name='payment_amount' step='0.01' onchange='update_partial(this)'></td>
+                <th>ID</th>
+                <th>Total</th>
+                <th>Balance</th>
+                <th>Date</th>
+                <th>Item</th>
+                <th>Amount</th>
+                <th>Category</th>
+                <th>Notes</th>
+                <th>Payment Type</th>
+                <th>Payment Amount</th>
             </tr>
-		  %end
-		</tbody>
-	  </table>
+            </thead>
+            <tbody>
+            %for item in items:
+            <!-- <tr data-id="{{item['id']}}" onclick="edit_entry(this)"> -->
+                <!-- <tr data-entryid="{{item['id']}}" onclick="edit_entry(this)"> -->
+                <tr>
+                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['id']}}</td>
+                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">${{item['show']['cum']}}</td>
+                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">${{item['show']['bal']}}</td>
+                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['date']}}</td>
+                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['item']}}</td>
+                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">${{item['show']['amt']}}</td>
+                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['category']}}</td>
+                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['notes']}}</td>
+                    <td>
+                        <select data-id="{{item['id']}}" class="payment_type" name='payment_type' onchange='highlight_row(this)'>
+                            <option value='none'></option>
+                            <option value='full'>Full</option>
+                            <option value='partial'>Partial</option>
+                            <option value='interest'>Interest</option>
+                            <option value='full_extra'>Full Extra</option>
+                            <option value='partial_extra'>Partial Extra</option>
+                        </select>
+                    </td>
+                    <td><input data-id="{{item['id']}}" class="payment_amount" type='number' name='payment_amount' step='0.01' onchange='update_partial(this)'></td>
+                </tr>
+            %end
+            </tbody>
+        </table>
+    </div>
   </div>
 
 
