@@ -353,15 +353,16 @@
 		<tbody>
 		  %for item in items:
 		  <!-- <tr data-id="{{item['id']}}" onclick="edit_entry(this)"> -->
-            <tr data-entryid="{{item['id']}}" onclick="edit_entry(this)">
-                <td>{{item['id']}}</td>
-                <td>${{item['show']['cum']}}</td>
-                <td>${{item['show']['bal']}}</td>
-                <td>{{item['date']}}</td>
-                <td>{{item['item']}}</td>
-                <td>${{item['show']['amt']}}</td>
-                <td>{{item['category']}}</td>
-                <td>{{item['notes']}}</td>
+            <!-- <tr data-entryid="{{item['id']}}" onclick="edit_entry(this)"> -->
+            <tr>
+                <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['id']}}</td>
+                <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">${{item['show']['cum']}}</td>
+                <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">${{item['show']['bal']}}</td>
+                <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['date']}}</td>
+                <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['item']}}</td>
+                <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">${{item['show']['amt']}}</td>
+                <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['category']}}</td>
+                <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['notes']}}</td>
                 <td>
                     <select data-id="{{item['id']}}" class="payment_type" name='payment_type' onchange='highlight_row(this)'>
                         <option value='none'></option>
@@ -454,10 +455,10 @@
   <script>
     function edit_entry(event){
         // console.log(event.tagName)
-        console.log(event.dataset.entryid)
+        // console.log(event.dataset.entryid)
         global.current_id = event.dataset.entryid
         entry = global.entries.find( elem => elem.id ==  global.current_id)
-        console.log(entry)
+        // console.log(entry)
         $('#edit_modal').modal('show');
         // $('#edit_entry_type').val(entry.type)
         // $('#edit_amount').val(entry.amount)
