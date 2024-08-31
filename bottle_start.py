@@ -235,7 +235,7 @@ def account_view():
 
     # print(json.dumps(selected_view,indent = 3))
     return bottle.template(
-		'test',
+		'account',
 		items = selected_view, 
 		config = legacy_config, 
 		selected = label, 
