@@ -44,6 +44,11 @@ budget_files, budget_entries = get_files(BUDGET_DIR)
 for entry in budget_entries:
 	if 'in_flight' not in entry:
 		entry['in_flight']= False
+	if 'entry' not in entry:
+		entry['entry'] = entry['amount']
+for entry in entries:
+	if 'entry' not in entry:
+		entry['entry'] = entry['amount']
 
 #process form into right data types
 def process_form_data(entry_form):
@@ -235,7 +240,7 @@ def account_view():
 
     # print(json.dumps(selected_view,indent = 3))
     return bottle.template(
-		'test',
+		'account',
 		items = selected_view, 
 		config = legacy_config, 
 		selected = label, 

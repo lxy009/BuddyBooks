@@ -68,9 +68,6 @@
 	  </table>
   </div>
 
-
-
-
   <!-- Add Entry Modal -->
   <div class="modal fade" id="add_modal" tabindex="-1" role="dialog" aria-labelledby="add_modal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -82,6 +79,7 @@
           </button>
         </div>
         <div class="modal-body">
+          <div class="modal_error_message"></div>
           <div class="row_form">
             <span>Type:</span>
             <select id="entry_type" name="type">
@@ -94,7 +92,8 @@
             </div>
             <div class="row_form">
               <span>Amount:</span>
-              <input type='number' name='amount' value="0" step="0.01" />
+              <!-- <input type='number' name='amount' value="0" step="0.01" /> -->
+               <input type="text" name='entry'/>
             </div>
             <div class="row_form">
               <span>Date:</span>
@@ -130,6 +129,7 @@
           </button>
         </div>
         <div class="modal-body">
+          <div class="modal_error_message"></div>
           <div class="row_form">
             <span>Type:</span>
             <select id="edit_entry_type" name="type">
@@ -142,7 +142,8 @@
             </div>
             <div class="row_form">
               <span>Amount:</span>
-              <input id="edit_amount" type='number' name='amount' value="0" step="0.01" />
+              <!-- <input id="edit_amount" type='number' name='amount' value="0" step="0.01" /> -->
+              <input id="edit_entry" type="text" name='entry'/>
             </div>
             <div class="row_form">
               <span>Date:</span>
@@ -291,8 +292,8 @@
     }
 
     function change_edit_input(event, value = ""){
-      console.log("inside")
-      console.log(event)
+      // console.log("inside")
+      // console.log(event)
       var input_switch = document.getElementById("edit_input_item");
       var selected = event.target.value;
       input_switch.innerHTML = "";
@@ -318,15 +319,57 @@
       }
     }
 
-    function submit_new_entry(event){
-      event.preventDefault();
-      const input = new FormData(event.target);
+    function parse_form_payload(event_target) {
+      const input = new FormData(event_target);
       const payload = {}
       for (const [name, value] of input) {
         payload[name] = value;
       }
-      payload.amount = Number(payload.amount)
+      // parse and calculate entry
+      if (payload.entry[0] == "=") { //parse as formula
+        try {
+          payload.amount = eval(payload.entry.substring(1)) // this throws an error
+        } catch (e) {
+          $('.modal_error_message').text('formula could not be parsed').addClass("alert alert-danger")
+          throw new Error("formula could not be parsed")
+        }
+      } else {
+        //attempt to parse as number
+        payload.amount = Number(payload.entry)
+        if( isNaN(payload.amount) ) {
+          $('.modal_error_message').text("entry can't be parsed into a numeric value").addClass("alert alert-danger")
+          throw new Error("entry can't be parsed into a numeric value")
+        }
+      }
       payload.in_flight = "in_flight" in payload ? true : false
+      return payload;
+    }
+
+    function submit_new_entry(event){
+      event.preventDefault();
+      // const input = new FormData(event.target);
+      // const payload = {}
+      // for (const [name, value] of input) {
+      //   payload[name] = value;
+      // }
+      // // parse and calculate entry
+      // if (payload.entry[0] == "=") { //parse as formula
+      //   try {
+      //     payload.amount = eval(payload.entry.substring(1)) // this throws an error
+      //   } catch (e) {
+      //     $('.modal_error_message').text('formula could not be parsed').addClass("alert alert-danger")
+      //     throw new Error("formula could not be parsed")
+      //   }
+      // } else {
+      //   //attempt to parse as number
+      //   payload.amount = Number(payload.amount)
+      //   if( isNaN(payload.amount) ) {
+      //     $('.modal_error_message').text("entry can't be parsed into a numeric value").addClass("alert alert-danger")
+      //     throw new Error("entry can't be parsed into a numeric value")
+      //   }
+      // }
+      // payload.in_flight = "in_flight" in payload ? true : false
+      const payload = parse_form_payload(event.target);
       fetch(global.api_add, {
         method: "POST",
         headers: {
@@ -339,7 +382,7 @@
         if (!response.ok) {
           throw new Error(`HTTP error, status = ${response.status}`);
         }
-        // document.getElementById("add_modal").modal('hide')
+        $('.modal_error_message').text("").removeClass("alert alert-danger")
         $('#add_modal').modal('hide');
         event.target.reset();
         change_input({"target": {"value": "reset"}})
@@ -360,13 +403,14 @@
 
     function edit_entry(event){
       // console.log(event.tagName)
-      console.log(event.dataset.id)
+      // console.log(event.dataset.id)
       global.current_id = event.dataset.id
       entry = global.entries.find( elem => elem.id == event.dataset.id)
-      console.log(entry)
+      // console.log(entry)
       $('#edit_modal').modal('show');
       $('#edit_entry_type').val(entry.type)
-      $('#edit_amount').val(entry.amount)
+      // $('#edit_amount').val(entry.amount)
+      $('#edit_entry').val(entry.entry);
       $('#edit_date').val(entry.date)
       change_edit_input({"target": {"value": entry.type}}, entry.item)
       $('#edit_in_flight_toggle').prop( "checked", entry.in_flight)
@@ -374,14 +418,15 @@
 
     function submit_edit(event){
       event.preventDefault();
-      const input = new FormData(event.target);
-      const payload = {}
-      for (const [name, value] of input) {
-        payload[name] = value;
-      }
-      payload.amount = Number(payload.amount)
+      const payload = parse_form_payload(event.target);
+      // const input = new FormData(event.target);
+      // const payload = {}
+      // for (const [name, value] of input) {
+      //   payload[name] = value;
+      // }
+      // payload.amount = Number(payload.amount)
       payload.id = global.current_id;
-      payload.in_flight = "in_flight" in payload ? true : false
+      // payload.in_flight = "in_flight" in payload ? true : false
       fetch(global.api_update + global.current_id, {
         method: "PUT",
         headers: {
@@ -394,7 +439,7 @@
         if (!response.ok) {
           throw new Error(`HTTP error, status = ${response.status}`);
         }
-        // document.getElementById("add_modal").modal('hide')
+        $('.modal_error_message').text("").removeClass("alert alert-danger")
         $('#edit_modal').modal('hide');
         event.target.reset();
         change_edit_input({"target": {"value": "reset"}})
