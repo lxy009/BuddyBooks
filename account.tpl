@@ -37,43 +37,43 @@
             })
         });
     </script>
-  <style>
-    * {
-	  font-family: Arial, sans-serif;
-	}
-    .sticky_panel {
-        position: sticky;
-        top: 0px;
-        background-color: white;
-        z-index: 1;
-    }
-	#new_entry div.label {
-	  display: inline-block;
-	  width: 100px;
-	  text-align: right;
-	  padding-right: 5px;
-	}
-	#table_holder {
-	  width: 80%;
-	  margin-left: auto;
-	  margin-right: auto;
-	}
-    .payment_amount {
-        display: none;
-    }
-    .accounting {
-        display: flex;
-        justify-content: space-between;
-    }
-    #action_panel {
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-    }
-    table.summary_amounts td {
-        padding: 2px 16px;
-    }
-  </style>
+    <style>
+        * {
+        font-family: Arial, sans-serif;
+        }
+        .sticky_panel {
+            position: sticky;
+            top: 0px;
+            background-color: white;
+            z-index: 1;
+        }
+        #new_entry div.label {
+        display: inline-block;
+        width: 100px;
+        text-align: right;
+        padding-right: 5px;
+        }
+        #table_holder {
+        width: 80%;
+        margin-left: auto;
+        margin-right: auto;
+        }
+        .payment_amount {
+            display: none;
+        }
+        .accounting {
+            display: flex;
+            justify-content: space-between;
+        }
+        #action_panel {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        table.summary_amounts td {
+            padding: 2px 16px;
+        }
+    </style>
     <script>    
         var global = {};
         global.debt_payment = {{initial_debt_payment}};

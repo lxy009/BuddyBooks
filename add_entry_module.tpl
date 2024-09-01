@@ -1,55 +1,14 @@
 
-  <style>
-  /*
-  * {
-	  font-family: Arial, sans-serif;
-	}
-  */
-  /*
-  #new_entry {
-    width: 1300px;
-  }
-	#new_entry div.label {
-  */
+<style>
   div.label {
-	  display: inline-block;
-	  width: 130px;
-	  text-align: right;
-	  padding-right:5px;
-	}
-  /*
-	#table_holder {
-	  width: 80%;
-	  margin-left:auto;
-	  margin-right:auto;
-	}
-	#form_holder {
-	  display: inline-block;
-	  width:400px;
-	  vertical-align: top;
-	}
-	#entry_holder {
-	  display: inline-block;
-	  width:800px;
-	  vertical-align: top;
-	}
-  */
-  /*
-  .container {
     display: inline-block;
-    width: 400px;
-    padding: 10px;
-    vertical-align: bottom;
+    width: 130px;
+    text-align: right;
+    padding-right:5px;
   }
-  */
-  /*
-  .submit_container {
-    margin-left: 190px;
-  }
-  */
-  </style>
+</style>
 
-  <script>
+<script>
   function other_forms() {
     var y = document.getElementById('category').value;
     var x = document.getElementById('for_extra_inputs');
@@ -83,9 +42,9 @@
       %end
 
   }
-  </script>
+</script>
 
-  <script>
+<script>
   function other_income_forms() {
     var y = document.getElementById('income_category').value;
     var x = document.getElementById('name_options');
@@ -161,9 +120,9 @@
     }
 
   }
-  </script>
+</script>
 
-  <script>
+<script>
   function post_form(x) {
 
     event.preventDefault();
@@ -182,6 +141,29 @@
       status_marker = document.getElementById("submission_status_income");
     }
     const form_data = new FormData(form);
+    console.log(form_data)
+    const item = form_data.get('item');
+    console.log(item);
+    const entry = form_data.get('entry');
+    console.log(entry)
+    let amount = NaN;
+    // parse and calculate entry
+    if (entry[0] == "=") { //parse as formula
+      try {
+        amount = eval(entry.substring(1)) // this throws an error
+      } catch (e) {
+        $('.modal_error_message').text('formula could not be parsed').addClass("alert alert-danger")
+        throw new Error("formula could not be parsed")
+      }
+    } else {
+      //attempt to parse as number
+      amount = Number(entry)
+      if( isNaN(amount) ) {
+        $('.modal_error_message').text("entry can't be parsed into a numeric value").addClass("alert alert-danger")
+        throw new Error("entry can't be parsed into a numeric value")
+      }
+    }
+    form_data.set('amount', amount);
 
     const request = new XMLHttpRequest();
     const url = "/add_entry";
@@ -220,7 +202,7 @@
 
     request.send(form_data);
   };
-  </script>
+</script>
 
 
 
@@ -237,10 +219,11 @@
         <a class="nav-link" id="pills-income-tab" data-toggle="pill" href="#pills-income" role="tab" aria-controls="pills-income" aria-selected="false">Income</a>
       </li>
     </ul>
-
+    <div class="alert alert-danger">Income Deprecated - DO NOT USE</div>
 
     <div class="tab-content" id="pills-tabContent" style="width:100%;">
       <section class="tab-pane fade show active" id="pills-expenses" role="tabpanel" aria-labelledby="pills-expenses-tab">
+        <div class="modal_error_message"></div>
         <form id='new_entry_expenses' style="width:100%;">
           <div class="row justify-content-center"><div class='col' style='text-align:center;'>
             <h1>Enter New Entry</h1>
@@ -263,7 +246,10 @@
                 </select>
                 <br />
               <div class='label'>Item: </div><input type='text' name='item' /><br />
-              <div class='label'>Amount:</div><input type='number' name='amount' step='0.01'><br />
+              <div class='label'>Amount:</div>
+              <!-- <input type='number' name='amount' step='0.01'> -->
+              <input type="text" name='entry' />
+              <br />
             </div>
             <div class='col' id='extra input'>
               <div id='for_extra_inputs'></div>
@@ -279,7 +265,7 @@
       </section>
 
       <section class="tab-pane fade" id="pills-income" role="tabpanel" aria-labelledby="pills-income-tab">
-        <!-- <form id='new_entry_income' action='/add_entry/income' method='post' style="width:100%;"> -->
+        <div class="modal_error_message"></div>
         <form id='new_entry_income' style='width:100%;'>
           <div class="row justify-content-center"><div class='col' style='text-align:center;'>
             <h1>Enter New Entry</h1>
