@@ -130,11 +130,6 @@
             sum_and_update();           
         }
 
-        // var as_accounting = function(x){
-        //     return "<div class='accounting'><div>$ &nbsp;</div><div>" +
-        //         x.toFixed(2) + "</div></div>"
-        // }
-
         var as_accounting = function(x){
             var class_name = x < 0 ? " class='negative' " : ""
             return "<div class='accounting'><div>$ &nbsp;</div><div" + class_name + ">" +

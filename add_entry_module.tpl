@@ -150,7 +150,8 @@
     // parse and calculate entry
     if (entry[0] == "=") { //parse as formula
       try {
-        amount = eval(entry.substring(1)) // this throws an error
+        // amount = eval(entry.substring(1)) // this throws an error
+        amount = Math.round(eval(entry.substring(1))*100)/100 // this throws an error
       } catch (e) {
         $('.modal_error_message').text('formula could not be parsed').addClass("alert alert-danger")
         throw new Error("formula could not be parsed")
