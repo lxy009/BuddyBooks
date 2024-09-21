@@ -212,7 +212,7 @@
 <!-- <body onload='other_forms(); other_income_forms();'> -->
 
 
-    <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+    <!-- <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
       <li class="nav-item">
         <a class="nav-link active" id="pills-expenses-tab" data-toggle="pill" href="#pills-expenses" role="tab" aria-controls="pills-expenses" aria-selected="true">Expenses</a>
       </li>
@@ -220,15 +220,15 @@
         <a class="nav-link" id="pills-income-tab" data-toggle="pill" href="#pills-income" role="tab" aria-controls="pills-income" aria-selected="false">Income</a>
       </li>
     </ul>
-    <div class="alert alert-danger">Income Deprecated - DO NOT USE</div>
+    <div class="alert alert-danger">Income Deprecated - DO NOT USE</div> -->
 
-    <div class="tab-content" id="pills-tabContent" style="width:100%;">
+    <!-- <div class="tab-content" id="pills-tabContent" style="width:100%;"> -->
       <section class="tab-pane fade show active" id="pills-expenses" role="tabpanel" aria-labelledby="pills-expenses-tab">
         <div class="modal_error_message"></div>
         <form id='new_entry_expenses' style="width:100%;">
-          <div class="row justify-content-center"><div class='col' style='text-align:center;'>
+          <!-- <div class="row justify-content-center"><div class='col' style='text-align:center;'>
             <h1>Enter New Entry</h1>
-          </div></div>
+          </div></div> -->
           <div class="row justify-content-center" style='margin-top:15px;'>
             <div class="col" id='main input' style='text-align:right;'>
               <div class='label'>Date:</div><input type='date' name='date'><br />
@@ -265,7 +265,7 @@
         </form>
       </section>
 
-      <section class="tab-pane fade" id="pills-income" role="tabpanel" aria-labelledby="pills-income-tab">
+      <!-- <section class="tab-pane fade" id="pills-income" role="tabpanel" aria-labelledby="pills-income-tab">
         <div class="modal_error_message"></div>
         <form id='new_entry_income' style='width:100%;'>
           <div class="row justify-content-center"><div class='col' style='text-align:center;'>
@@ -293,7 +293,7 @@
             <div class="col" id='income_buffer'></div>
           </div>
         </form>
-      </section>
+      </section> -->
     </div>
 
 

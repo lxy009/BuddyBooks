@@ -48,15 +48,15 @@
             z-index: 1;
         }
         #new_entry div.label {
-        display: inline-block;
-        width: 100px;
-        text-align: right;
-        padding-right: 5px;
+            display: inline-block;
+            width: 100px;
+            text-align: right;
+            padding-right: 5px;
         }
         #table_holder {
-        width: 80%;
-        margin-left: auto;
-        margin-right: auto;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
         }
         .payment_amount {
             display: none;
