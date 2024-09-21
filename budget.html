@@ -217,7 +217,14 @@
 
       //sort by date
       global.entries.sort( (a, b) => {
-        return new Date(a.date) < new Date(b.date) ? -1 : 1;
+        // return new Date(a.date) < new Date(b.date) ? -1 : 1;
+        date_1 = new Date(a.date)
+        date_2 = new Date(b.date)
+        if (date_1 = date_2) {
+          return a.item < b.item ? -1 : 1;
+        } else {
+          return new Date(a.date) < new Date(b.date) ? -1 : 1;
+        }
       })
       //calculate running table
       global.running = [global.running[0]]
