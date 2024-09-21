@@ -48,22 +48,27 @@
             z-index: 1;
         }
         #new_entry div.label {
-        display: inline-block;
-        width: 100px;
-        text-align: right;
-        padding-right: 5px;
+            display: inline-block;
+            width: 100px;
+            text-align: right;
+            padding-right: 5px;
         }
         #table_holder {
-        width: 80%;
-        margin-left: auto;
-        margin-right: auto;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
         }
         .payment_amount {
             display: none;
         }
+        /* .accounting {
+            display: flex;
+            justify-content: space-between;
+        } */
         .accounting {
             display: flex;
             justify-content: space-between;
+            max-width: 140px;
         }
         #action_panel {
             display: flex;
@@ -72,6 +77,15 @@
         }
         table.summary_amounts td {
             padding: 2px 16px;
+        }
+        table#data_content td {
+            padding: 2px 16px;
+        }
+        table#data_content th {
+            text-align: center;
+        }
+        table#data_content tr td:nth-child(3) {
+            min-width: 110px;
         }
     </style>
     <script>    
@@ -130,11 +144,6 @@
             sum_and_update();           
         }
 
-        // var as_accounting = function(x){
-        //     return "<div class='accounting'><div>$ &nbsp;</div><div>" +
-        //         x.toFixed(2) + "</div></div>"
-        // }
-
         var as_accounting = function(x){
             var class_name = x < 0 ? " class='negative' " : ""
             return "<div class='accounting'><div>$ &nbsp;</div><div" + class_name + ">" +
@@ -176,6 +185,8 @@
             document.getElementById("total_full").innerHTML = as_accounting(sums[3]);
             document.getElementById("total_partial").innerHTML = as_accounting(sums[4]);
             document.getElementById("total_total").innerHTML = as_accounting(sums[3] + sums[4]);
+
+            document.getElementById("total_total_total").innerHTML = as_accounting(sums[3] + sums[4] + sums[0] + sums[1] + sums[2]);
         };
     </script>
     <script>
@@ -331,6 +342,7 @@
                 <tr style='background-color:red;'><td id='total_full'></td><td>Full</td></tr>
                 <tr style='background-color:green;'><td id='total_partial'></td><td>Partial</td></tr>
                 <tr><td id='total_total'></td><td></td></tr>
+                <tr style='background-color:#777;color:white'><td>Debt + Payment:</td><td id='total_total_total'></td></tr>
             </tbody></table>    
             <button class="btn btn-success" type="button" onclick='submit_plan()'>
                 Submit Payment Plan
@@ -367,11 +379,27 @@
                 <!-- <tr data-entryid="{{item['id']}}" onclick="edit_entry(this)"> -->
                 <tr>
                     <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['id']}}</td>
-                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">${{item['show']['cum']}}</td>
-                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">${{item['show']['bal']}}</td>
-                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['date']}}</td>
+                    <!-- <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">${{item['show']['cum']}}</td> -->
+                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">
+                        <div class='accounting'>
+                            <div>$ &nbsp;</div>
+                            <div>{{item['show']['cum']}}</div>
+                        </div>
+                    </td>
+                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">
+                        <div class='accounting'>
+                            <div>$ &nbsp;</div>
+                            <div>{{item['show']['bal']}}</div>
+                        </div>
+                    </td>
+                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['date'][:10]}}</td>
                     <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['item']}}</td>
-                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">${{item['show']['amt']}}</td>
+                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">
+                        <div class='accounting'>
+                            <div>$ &nbsp;</div>
+                            <div>{{item['show']['amt']}}</div>
+                        </div>
+                    </td>
                     <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['category']}}</td>
                     <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['notes']}}</td>
                     <td>

@@ -233,9 +233,9 @@ def account_view():
         running = running + obj['balance']
         obj['cumulative'] = running
         obj['show'] = {
-            "cum": "{:.2f}".format(obj['cumulative']),
-			"bal": "{:.2f}".format(obj['balance']),
-			"amt": "{:.2f}".format(obj['amount']),
+            "cum": "{:,.2f}".format(obj['cumulative']),
+			"bal": "{:,.2f}".format(obj['balance']),
+			"amt": "{:,.2f}".format(obj['amount']),
         }
 
     # print(json.dumps(selected_view,indent = 3))

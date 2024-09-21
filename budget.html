@@ -33,6 +33,11 @@
     .in_flight {
       background: yellow;
     }
+    .formula_entry {
+      width: 300px;
+      height: 3.3lh;
+    }
+    
   </style>
     <script>
         var global = {};
@@ -92,8 +97,8 @@
             </div>
             <div class="row_form">
               <span>Amount:</span>
-              <!-- <input type='number' name='amount' value="0" step="0.01" /> -->
-               <input type="text" name='entry'/>
+               <!-- <input type="text" name='entry'/> -->
+                <textarea name='entry'></textarea>
             </div>
             <div class="row_form">
               <span>Date:</span>
@@ -142,8 +147,8 @@
             </div>
             <div class="row_form">
               <span>Amount:</span>
-              <!-- <input id="edit_amount" type='number' name='amount' value="0" step="0.01" /> -->
-              <input id="edit_entry" type="text" name='entry'/>
+              <!-- <input id="edit_entry" type="text" name='entry'/> -->
+               <textarea id='edit_entry' name='entry' class='formula_entry'></textarea>
             </div>
             <div class="row_form">
               <span>Date:</span>
@@ -191,17 +196,11 @@
           global.entries = data.data;
           global.running = [0] //future will be start value
           create_view()
-            // update_table()
-            // console.log(global.the_data);
         })
         .catch( (error) => {
             console.log("error");
             console.log(error);
-            // const p = document.createElement("p");
-            // p.appendChild(document.createTextNode(`Error: ${error.message}`));
-            // document.body.insertBefore(p, myList);
         })
-        // global.start_value = {{start_value}};
 
 
     var form = document.getElementById('budget_form');
@@ -218,7 +217,14 @@
 
       //sort by date
       global.entries.sort( (a, b) => {
-        return new Date(a.date) < new Date(b.date) ? -1 : 1;
+        // return new Date(a.date) < new Date(b.date) ? -1 : 1;
+        date_1 = new Date(a.date)
+        date_2 = new Date(b.date)
+        if (date_1 = date_2) {
+          return a.item < b.item ? -1 : 1;
+        } else {
+          return new Date(a.date) < new Date(b.date) ? -1 : 1;
+        }
       })
       //calculate running table
       global.running = [global.running[0]]
@@ -292,8 +298,6 @@
     }
 
     function change_edit_input(event, value = ""){
-      // console.log("inside")
-      // console.log(event)
       var input_switch = document.getElementById("edit_input_item");
       var selected = event.target.value;
       input_switch.innerHTML = "";
@@ -328,7 +332,7 @@
       // parse and calculate entry
       if (payload.entry[0] == "=") { //parse as formula
         try {
-          payload.amount = eval(payload.entry.substring(1)) // this throws an error
+          payload.amount = Math.round(eval(payload.entry.substring(1))*100)/100 // this throws an error
         } catch (e) {
           $('.modal_error_message').text('formula could not be parsed').addClass("alert alert-danger")
           throw new Error("formula could not be parsed")
@@ -347,28 +351,6 @@
 
     function submit_new_entry(event){
       event.preventDefault();
-      // const input = new FormData(event.target);
-      // const payload = {}
-      // for (const [name, value] of input) {
-      //   payload[name] = value;
-      // }
-      // // parse and calculate entry
-      // if (payload.entry[0] == "=") { //parse as formula
-      //   try {
-      //     payload.amount = eval(payload.entry.substring(1)) // this throws an error
-      //   } catch (e) {
-      //     $('.modal_error_message').text('formula could not be parsed').addClass("alert alert-danger")
-      //     throw new Error("formula could not be parsed")
-      //   }
-      // } else {
-      //   //attempt to parse as number
-      //   payload.amount = Number(payload.amount)
-      //   if( isNaN(payload.amount) ) {
-      //     $('.modal_error_message').text("entry can't be parsed into a numeric value").addClass("alert alert-danger")
-      //     throw new Error("entry can't be parsed into a numeric value")
-      //   }
-      // }
-      // payload.in_flight = "in_flight" in payload ? true : false
       const payload = parse_form_payload(event.target);
       fetch(global.api_add, {
         method: "POST",
@@ -402,14 +384,10 @@
     };
 
     function edit_entry(event){
-      // console.log(event.tagName)
-      // console.log(event.dataset.id)
       global.current_id = event.dataset.id
       entry = global.entries.find( elem => elem.id == event.dataset.id)
-      // console.log(entry)
       $('#edit_modal').modal('show');
       $('#edit_entry_type').val(entry.type)
-      // $('#edit_amount').val(entry.amount)
       $('#edit_entry').val(entry.entry);
       $('#edit_date').val(entry.date)
       change_edit_input({"target": {"value": entry.type}}, entry.item)
@@ -419,14 +397,7 @@
     function submit_edit(event){
       event.preventDefault();
       const payload = parse_form_payload(event.target);
-      // const input = new FormData(event.target);
-      // const payload = {}
-      // for (const [name, value] of input) {
-      //   payload[name] = value;
-      // }
-      // payload.amount = Number(payload.amount)
       payload.id = global.current_id;
-      // payload.in_flight = "in_flight" in payload ? true : false
       fetch(global.api_update + global.current_id, {
         method: "PUT",
         headers: {
@@ -447,7 +418,6 @@
       })
       .then( data => {
         console.log(data);
-        // payload.id = data.id;
         for(var i = 0; i < global.entries.length; i++) {
           if (global.entries[i].id == global.current_id) {
             global.entries[i] = payload
@@ -474,7 +444,6 @@
         if (!response.ok) {
           throw new Error(`HTTP error, status = ${response.status}`);
         }
-        // document.getElementById("add_modal").modal('hide')
         $('#edit_modal').modal('hide');
         $('#budget_edit')[0].reset();
         change_edit_input({"target": {"value": "reset"}})
@@ -482,7 +451,6 @@
       })
       .then( data => {
         console.log(data);
-        // global.entries.push(payload)
         var idx = global.entries.findIndex(elem => elem.id == global.current_id)
         global.entries.splice( idx, 1)
         create_view()
@@ -493,23 +461,6 @@
         console.log(error);
       })
     }
-
-    // sum_and_update()
-    // // console.log(the_data);
-    // for (var i = 0; i < the_data.length; i++){
-    //     // console.log(i+"-----------------")
-    //     if (the_data[i].payoff_type) {
-    //         // console.log(the_data[i]);
-    //         idx = {"full": 1, "partial": 2, "interest": 3, "full_extra": 4, "partial_extra": 5}[the_data[i].payoff_type]
-    //         // console.log(idx)
-    //         // console.log(`[data-id='${the_data[i].id}']`)
-    //         var doms_to_update = document.querySelectorAll(`[data-id='${the_data[i].id}']`);
-    //         var the_select = doms_to_update[0];
-    //         the_select.selectedIndex = idx;
-    //         highlight_row(the_select);
-    //         doms_to_update[1].value = the_data[i].payoff_value;
-    //     }
-    // }
   </script>
 </body>
 
