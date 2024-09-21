@@ -291,8 +291,6 @@
     }
 
     function change_edit_input(event, value = ""){
-      // console.log("inside")
-      // console.log(event)
       var input_switch = document.getElementById("edit_input_item");
       var selected = event.target.value;
       input_switch.innerHTML = "";
@@ -327,7 +325,7 @@
       // parse and calculate entry
       if (payload.entry[0] == "=") { //parse as formula
         try {
-          payload.amount = eval(payload.entry.substring(1)) // this throws an error
+          payload.amount = Math.round(eval(payload.entry.substring(1))*100)/100 // this throws an error
         } catch (e) {
           $('.modal_error_message').text('formula could not be parsed').addClass("alert alert-danger")
           throw new Error("formula could not be parsed")
