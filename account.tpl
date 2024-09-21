@@ -185,6 +185,8 @@
             document.getElementById("total_full").innerHTML = as_accounting(sums[3]);
             document.getElementById("total_partial").innerHTML = as_accounting(sums[4]);
             document.getElementById("total_total").innerHTML = as_accounting(sums[3] + sums[4]);
+
+            document.getElementById("total_total_total").innerHTML = as_accounting(sums[3] + sums[4] + sums[0] + sums[1] + sums[2]);
         };
     </script>
     <script>
@@ -340,6 +342,7 @@
                 <tr style='background-color:red;'><td id='total_full'></td><td>Full</td></tr>
                 <tr style='background-color:green;'><td id='total_partial'></td><td>Partial</td></tr>
                 <tr><td id='total_total'></td><td></td></tr>
+                <tr style='background-color:#777;color:white'><td>Debt + Payment:</td><td id='total_total_total'></td></tr>
             </tbody></table>    
             <button class="btn btn-success" type="button" onclick='submit_plan()'>
                 Submit Payment Plan
