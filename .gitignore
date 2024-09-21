@@ -1,4 +1,9 @@
+# local development test configuration and data
 .env
+budget/*
+configuration/*
+data/*
+configuration.json
 
 # Logs
 logs
