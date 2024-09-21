@@ -61,9 +61,14 @@
         .payment_amount {
             display: none;
         }
+        /* .accounting {
+            display: flex;
+            justify-content: space-between;
+        } */
         .accounting {
             display: flex;
             justify-content: space-between;
+            max-width: 140px;
         }
         #action_panel {
             display: flex;
@@ -72,6 +77,15 @@
         }
         table.summary_amounts td {
             padding: 2px 16px;
+        }
+        table#data_content td {
+            padding: 2px 16px;
+        }
+        table#data_content th {
+            text-align: center;
+        }
+        table#data_content tr td:nth-child(3) {
+            min-width: 110px;
         }
     </style>
     <script>    
@@ -362,11 +376,27 @@
                 <!-- <tr data-entryid="{{item['id']}}" onclick="edit_entry(this)"> -->
                 <tr>
                     <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['id']}}</td>
-                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">${{item['show']['cum']}}</td>
-                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">${{item['show']['bal']}}</td>
-                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['date']}}</td>
+                    <!-- <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">${{item['show']['cum']}}</td> -->
+                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">
+                        <div class='accounting'>
+                            <div>$ &nbsp;</div>
+                            <div>{{item['show']['cum']}}</div>
+                        </div>
+                    </td>
+                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">
+                        <div class='accounting'>
+                            <div>$ &nbsp;</div>
+                            <div>{{item['show']['bal']}}</div>
+                        </div>
+                    </td>
+                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['date'][:10]}}</td>
                     <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['item']}}</td>
-                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">${{item['show']['amt']}}</td>
+                    <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">
+                        <div class='accounting'>
+                            <div>$ &nbsp;</div>
+                            <div>{{item['show']['amt']}}</div>
+                        </div>
+                    </td>
                     <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['category']}}</td>
                     <td data-entryid="{{item['id']}}" onclick="edit_entry(this)">{{item['notes']}}</td>
                     <td>
