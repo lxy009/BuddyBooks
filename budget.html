@@ -213,17 +213,16 @@
     cond_edit_input.addEventListener("change", change_edit_input)
 
     function create_view(){
-      console.log("creating view")
 
       //sort by date
       global.entries.sort( (a, b) => {
         // return new Date(a.date) < new Date(b.date) ? -1 : 1;
         date_1 = new Date(a.date)
         date_2 = new Date(b.date)
-        if (date_1 = date_2) {
-          return a.item < b.item ? -1 : 1;
+        if (date_1.valueOf() == date_2.valueOf()) {
+          return a.item.toLowerCase() < b.item.toLowerCase() ? -1 : 1;
         } else {
-          return new Date(a.date) < new Date(b.date) ? -1 : 1;
+          return date_1.valueOf() < date_2.valueOf() ? -1 : 1;
         }
       })
       //calculate running table
