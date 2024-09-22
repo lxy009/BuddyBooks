@@ -45,81 +45,81 @@
 </script>
 
 <script>
-  function other_income_forms() {
-    var y = document.getElementById('income_category').value;
-    var x = document.getElementById('name_options');
+  // function other_income_forms() {
+  //   var y = document.getElementById('income_category').value;
+  //   var x = document.getElementById('name_options');
     
-    if(y == 'interest'){
-      x.innerHTML = "<div class='label'>Name:</div><select name='name'> \
-        <option value='American Express Savings'>American Express Savings</option> \
-        <option value='Austin Telco Savings'>Austin Telco Savings</option> \
-        <option value='Bank of America Checking'>Bank of America Checking</option> \
-        <option value='Bank of America Savings'>Bank of America Savings</option> \
-        <option value='Capital One 360 Savings'>Capital One 360 Savings</option> \
-        </select>";
-    } else if(y == 'dividend'){
-        x.innerHTML = "<div class='label'>Name:</div><select name='name'> \
-          <option value='American Campus Communities'>American Campus Communities</option> \
-          </select>";
-    } else if(y == 'salary') {
-        //x.innerHTML = "<div class='label'>Name:</div><select name='name'> \
-        //  <option value='Cosmic Lens Consulting'>Cosmic Lens Consulting</option> \
-        //  </select>";
-        let salary_input = "<div class='label'>Name:</div>"
-        salary_input += "<select name='name'>"
-        %for item in config['income_sources']['salary']:
-          salary_input += "<option value='{{item['value']}}'>{{item['label']}}</option>"
-        %end
-        salary_input += "</select>"
-        x.innerHTML = salary_input;
-    } else if (y == 'business'){
-      x.innerHTML = "<div class='label'>Name:</div><select name='name'> \
-        <option value='Cosmic Lens Consulting'>Cosmic Lens Consulting</option> \
-        </select>";
-    } else {
-      x.innerHTML = "<div class='label'>Name:</div><select name='name'> \
-        <option value='other'>Other</option> \
-        </select>";
-    }
+  //   if(y == 'interest'){
+  //     x.innerHTML = "<div class='label'>Name:</div><select name='name'> \
+  //       <option value='American Express Savings'>American Express Savings</option> \
+  //       <option value='Austin Telco Savings'>Austin Telco Savings</option> \
+  //       <option value='Bank of America Checking'>Bank of America Checking</option> \
+  //       <option value='Bank of America Savings'>Bank of America Savings</option> \
+  //       <option value='Capital One 360 Savings'>Capital One 360 Savings</option> \
+  //       </select>";
+  //   } else if(y == 'dividend'){
+  //       x.innerHTML = "<div class='label'>Name:</div><select name='name'> \
+  //         <option value='American Campus Communities'>American Campus Communities</option> \
+  //         </select>";
+  //   } else if(y == 'salary') {
+  //       //x.innerHTML = "<div class='label'>Name:</div><select name='name'> \
+  //       //  <option value='Cosmic Lens Consulting'>Cosmic Lens Consulting</option> \
+  //       //  </select>";
+  //       let salary_input = "<div class='label'>Name:</div>"
+  //       salary_input += "<select name='name'>"
+  //       %for item in config['income_sources']['salary']:
+  //         salary_input += "<option value='{{item['value']}}'>{{item['label']}}</option>"
+  //       %end
+  //       salary_input += "</select>"
+  //       x.innerHTML = salary_input;
+  //   } else if (y == 'business'){
+  //     x.innerHTML = "<div class='label'>Name:</div><select name='name'> \
+  //       <option value='Cosmic Lens Consulting'>Cosmic Lens Consulting</option> \
+  //       </select>";
+  //   } else {
+  //     x.innerHTML = "<div class='label'>Name:</div><select name='name'> \
+  //       <option value='other'>Other</option> \
+  //       </select>";
+  //   }
 
-    x = document.getElementById('for_income_extras');
-    if(y == 'interest'){
-      x.innerHTML = "<div class='label'>Balance:</div><input type='number' step='0.01' name='balance'/><br />"
-    } else if(y == 'dividend'){
-      x.innerHTML = '';
-    } else if(y == 'salary'){
-        x.innerHTML = `<div class='label'>Gross Pay:</div><input type='number' step='0.01' name='gross_pay'/><br /> 
-            <div class='blockLabel'>Deductions:</div><br/> 
-            <div id='salaryVoluntaryDeductions'> 
-              <div class='blockLabel'>Voluntary:</div><br /> 
-              <div class='label'>Health:</div><input type='number' step='0.01' name='health'/><br /> 
-              <div class='label'>Dental:</div><input type='number' step='0.01' name='dental'/><br /> 
-              <div class='label'>Vision:</div><input type='number' step='0.01' name='vision'/><br /> 
-              <div class='label'>FSA:</div><input type='number' step='0.01' name='fsa'/><br /> 
-            </div> 
-            <div class='blockLabel'>Statutory:</div><br /> 
-            <div class='label'>Income Tax:</div><input type='number' step='0.01' name='income_tax'/><br /> 
-            <div class='label'>Social Security:</div><input type='number' step='0.01' name='ss_tax'/><br /> 
-            <div class='label'>Medicare:</div><input type='number' step='0.01' name='medicare_tax'/><br /> 
-            <div class='label'>Retirement:</div><br /> 
-            <div class='label'>401k:</div><input type='number' step='0.01' name='retirement'/><br />
-            <div class='label'>match:</div><input type='number' step='0.01' name='retire_match'/><br />
-            <div class='label'>Other:</div><br /> 
-            <div class='label'>ADD:</div><input type='number' step='0.01' name='add'/><br /> 
-            <div class='label'>Life:</div><input type='number' step='0.01' name='life'/><br /> 
-            <div class='label'>ADD+Life:</div><input type='number' step='0.01' name='addlife'/><br />  
-            <div class='label'>Spouse LIfe:</div><input type='number' step='0.01' name='spouselife'/><br /> 
-            <div class='label'>Accident:</div><input type='number' step='0.01' name='accident'/><br /> 
-            <div class='label'>Critical Illness:</div><input type='number' step='0.01' name='critillness'/><br /> 
-            <div class='label'>LTD:</div><input type='number' step='0.01' name='ltd'/><br /> 
-            <div class='label'>ID Protection:</div><input type='number' step='0.01' name='id'/><br /> `
-    } else  if (y == 'business'){
-      x.innerHTML = '';
-    } else {
-      x.innerHTML = "<div class='label'>Notes:</div><textarea name='notes' rows='5' cols='40'></textarea>";
-    }
+  //   x = document.getElementById('for_income_extras');
+  //   if(y == 'interest'){
+  //     x.innerHTML = "<div class='label'>Balance:</div><input type='number' step='0.01' name='balance'/><br />"
+  //   } else if(y == 'dividend'){
+  //     x.innerHTML = '';
+  //   } else if(y == 'salary'){
+  //       x.innerHTML = `<div class='label'>Gross Pay:</div><input type='number' step='0.01' name='gross_pay'/><br /> 
+  //           <div class='blockLabel'>Deductions:</div><br/> 
+  //           <div id='salaryVoluntaryDeductions'> 
+  //             <div class='blockLabel'>Voluntary:</div><br /> 
+  //             <div class='label'>Health:</div><input type='number' step='0.01' name='health'/><br /> 
+  //             <div class='label'>Dental:</div><input type='number' step='0.01' name='dental'/><br /> 
+  //             <div class='label'>Vision:</div><input type='number' step='0.01' name='vision'/><br /> 
+  //             <div class='label'>FSA:</div><input type='number' step='0.01' name='fsa'/><br /> 
+  //           </div> 
+  //           <div class='blockLabel'>Statutory:</div><br /> 
+  //           <div class='label'>Income Tax:</div><input type='number' step='0.01' name='income_tax'/><br /> 
+  //           <div class='label'>Social Security:</div><input type='number' step='0.01' name='ss_tax'/><br /> 
+  //           <div class='label'>Medicare:</div><input type='number' step='0.01' name='medicare_tax'/><br /> 
+  //           <div class='label'>Retirement:</div><br /> 
+  //           <div class='label'>401k:</div><input type='number' step='0.01' name='retirement'/><br />
+  //           <div class='label'>match:</div><input type='number' step='0.01' name='retire_match'/><br />
+  //           <div class='label'>Other:</div><br /> 
+  //           <div class='label'>ADD:</div><input type='number' step='0.01' name='add'/><br /> 
+  //           <div class='label'>Life:</div><input type='number' step='0.01' name='life'/><br /> 
+  //           <div class='label'>ADD+Life:</div><input type='number' step='0.01' name='addlife'/><br />  
+  //           <div class='label'>Spouse LIfe:</div><input type='number' step='0.01' name='spouselife'/><br /> 
+  //           <div class='label'>Accident:</div><input type='number' step='0.01' name='accident'/><br /> 
+  //           <div class='label'>Critical Illness:</div><input type='number' step='0.01' name='critillness'/><br /> 
+  //           <div class='label'>LTD:</div><input type='number' step='0.01' name='ltd'/><br /> 
+  //           <div class='label'>ID Protection:</div><input type='number' step='0.01' name='id'/><br /> `
+  //   } else  if (y == 'business'){
+  //     x.innerHTML = '';
+  //   } else {
+  //     x.innerHTML = "<div class='label'>Notes:</div><textarea name='notes' rows='5' cols='40'></textarea>";
+  //   }
 
-  }
+  // }
 </script>
 
 <script>
@@ -129,17 +129,17 @@
 
     let form = '';
     let status_marker = '';
-    if (x === 'income') {
-      form = document.getElementById("new_entry_income");
-      status_marker = document.getElementById("submission_status_income");
-    } else if (x === 'expense') {
+    // if (x === 'income') {
+    //   form = document.getElementById("new_entry_income");
+    //   status_marker = document.getElementById("submission_status_income");
+    // } else if (x === 'expense') {
       form = document.getElementById("new_entry_expenses");
       status_marker = document.getElementById("submission_status_expense");
-    } else {
-      //WARNING
-      form = document.getElementById("new_entry_income");
-      status_marker = document.getElementById("submission_status_income");
-    }
+    // } else {
+    //   //WARNING
+    //   form = document.getElementById("new_entry_income");
+    //   status_marker = document.getElementById("submission_status_income");
+    // }
     const form_data = new FormData(form);
     console.log(form_data)
     const item = form_data.get('item');
@@ -189,7 +189,7 @@
         // status_marker.innerHTML = 'success';
         // status_marker.className = "badge badge-success";        
         form.reset(); // but doesn't update category though - so run function manually?
-        other_income_forms();
+        // other_income_forms();
         other_forms();
         window.location.reload();
       }
@@ -301,8 +301,8 @@
 
 <script>
   document.getElementById('category').addEventListener('change',other_forms);
-  document.getElementById('income_category').addEventListener('change',other_income_forms);
-  document.getElementById('new_entry_income').addEventListener('submit',() => post_form('income'));
+  // document.getElementById('income_category').addEventListener('change',other_income_forms);
+  // document.getElementById('new_entry_income').addEventListener('submit',() => post_form('income'));
   document.getElementById('new_entry_expenses').addEventListener('submit',() => post_form('expense'));
 </script>
 
