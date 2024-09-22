@@ -37,6 +37,13 @@
       width: 300px;
       height: 3.3lh;
     }
+    .month_row {
+      background: #444;
+      color: white;
+    }
+    .month_row td:first-child {
+      text-align: center;
+    }
     
   </style>
     <script>
@@ -225,24 +232,61 @@
           return date_1.valueOf() < date_2.valueOf() ? -1 : 1;
         }
       })
+
       //calculate running table
       global.running = [global.running[0]]
+      const monthly_calculations = [ 
+        [ 0, global.entries[0].type == 'deposit' ? global.entries[0].amount : -1 * global.entries[0].amount ]
+      ]
+      const first_month = global.entries[0].date.substring(0,7)
+      let current_month = first_month
       global.entries.forEach( (elem, i) => {
         to_add = elem.type == 'deposit' ? elem.amount : -1 * elem.amount
         global.running[i+1] = global.running[i] + to_add
+        const this_month = elem.date.substring(0,7)
+        if (current_month != this_month){
+          monthly_calculations.push([global.running[i], global.running[i+1]])
+          current_month = this_month
+        }
       })
-      console.log(global);
+      monthly_calculations.push([global.running[global.running.length-1],0])
 
       // create view
       const tbody = document.getElementById('data_content').children[0];
       tbody.innerHTML = ""; // clean view
       tbody.appendChild( create_view_row(global.running[0], "", "","","", false))
+      current_month = first_month
+      let monthly_idx = 0
+      tbody.appendChild( create_month_row(current_month, monthly_calculations[monthly_idx+1][0]-monthly_calculations[monthly_idx][0]) )
       global.entries.forEach( (datum, i) => {
-          // if (datum.paid) new_row.classList.push("paid")
-          // if (datum.auto_pay) new_row.classList.push("auto_pay")
+        const this_month = datum.date.substring(0,7)
+        if (current_month != this_month){
+          monthly_idx += 1
+          tbody.appendChild( create_month_row(this_month,monthly_calculations[monthly_idx+1][0]-monthly_calculations[monthly_idx][0]) )
+          current_month = this_month
+        }
         to_add = datum.type == 'deposit' ? datum.amount : -1 * datum.amount
         tbody.appendChild( create_view_row(global.running[i+1], to_add, datum.item, datum.date, datum.id, datum.in_flight) )
       });
+    }
+
+    function create_month_row(year_month, month_delta) {
+      const new_row = document.createElement("tr");
+      new_row.className = "month_row"
+      
+      const month_label = document.createElement("td");
+      month_label.setAttribute("colspan","2")
+      month_label.innerHTML = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 
+        'September','October', 'November', 'December'
+      ][Number(year_month.substring(5,7))-1] + " " + year_month.substring(0,4)
+      new_row.appendChild(month_label)
+
+      const delta_entry = document.createElement("td")
+      delta_entry.setAttribute("colspan","2")
+      delta_entry.innerHTML = "monthly delta: $ " + month_delta.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") 
+      new_row.appendChild(delta_entry)
+
+      return(new_row)
     }
 
     function create_view_row(running, amount, item, date, id, in_flight) {
