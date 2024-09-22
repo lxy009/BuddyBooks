@@ -37,6 +37,13 @@
       width: 300px;
       height: 3.3lh;
     }
+    .month_row {
+      background: #444;
+      color: white;
+    }
+    .month_row td:first-child {
+      text-align: center;
+    }
     
   </style>
     <script>
@@ -237,12 +244,37 @@
       const tbody = document.getElementById('data_content').children[0];
       tbody.innerHTML = ""; // clean view
       tbody.appendChild( create_view_row(global.running[0], "", "","","", false))
+      let current_month = global.entries[0].date.substring(0,7)
+      console.log(current_month)
+      tbody.appendChild( create_month_row(current_month) )
       global.entries.forEach( (datum, i) => {
           // if (datum.paid) new_row.classList.push("paid")
           // if (datum.auto_pay) new_row.classList.push("auto_pay")
+        const this_month = datum.date.substring(0,7)
+        if (current_month != this_month){
+          tbody.appendChild( create_month_row(this_month) )
+          current_month = this_month
+        }
         to_add = datum.type == 'deposit' ? datum.amount : -1 * datum.amount
         tbody.appendChild( create_view_row(global.running[i+1], to_add, datum.item, datum.date, datum.id, datum.in_flight) )
       });
+    }
+
+    function create_month_row(year_month) {
+      const new_row = document.createElement("tr");
+      new_row.className = "month_row"
+      
+      const month_label = document.createElement("td");
+      month_label.setAttribute("colspan","2")
+      month_label.innerHTML = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 
+        'September','October', 'November', 'December'
+      ][Number(year_month.substring(5,7))-1] + " " + year_month.substring(0,4)
+      new_row.appendChild(month_label)
+
+      new_row.appendChild(document.createElement("td"))
+      new_row.appendChild(document.createElement("td"))
+
+      return(new_row)
     }
 
     function create_view_row(running, amount, item, date, id, in_flight) {
