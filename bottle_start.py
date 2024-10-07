@@ -19,6 +19,8 @@ DATA_DIR = os.getenv('DATA_DIR')
 CONFIG_DIR = os.getenv('CONFIG_DIR')
 BUDGET_DIR = os.getenv('BUDGET_DIR')
 
+MAX_MEM_FILE = 1024 * 1024 # to override default of 102,400
+
 #PREPROCESSING ---------------------------------------------------------------
 
 with open("configuration.json") as json_file:
@@ -166,6 +168,7 @@ def get_entries():
         }
 
     # print(json.dumps(selected_view,indent = 3))
+    # print(len(selected_view))
 	
     bottle.response.headers['Content-Type'] = 'application/json'
     bottle.response.headers['Cache-Control'] = 'no-cache'
@@ -576,6 +579,16 @@ def monthly_expense_new_entry():
 	result = debt.insert_one(new_json)
 
 	return 'entry recorded <br/><a href="/debt">Return to Debt</a>'
+
+
+
+
+
+
+
+
+
+bottle.BaseRequest.MEMFILE_MAX = MAX_MEM_FILE
 
 
 bottle.run(host = 'localhost', port = PORT)
