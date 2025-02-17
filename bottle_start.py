@@ -228,6 +228,7 @@ def account_view():
 		if acct["value"] == payment_method:
 			view_id = acct["id"]
 			debt_payment = acct["debt_payment"]
+			label = acct["label"]
 			break
 		else:
 			view_id = ""
