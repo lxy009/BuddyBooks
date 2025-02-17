@@ -75,7 +75,8 @@ def dt2str(dt: datetime):
 
 @bottle.route('/')
 def index():
-	return bottle.template('add_entry', config = legacy_config)
+	# return bottle.template('add_entry', config = legacy_config)
+	return bottle.static_file('dashboard.html', root='./')
 
 @bottle.route('/budget_view')
 def budget_html():
@@ -185,6 +186,8 @@ def add_new_entry_expense():
 	to_enter["id"] = str(uuid4())
 	to_enter["date"] = dt2str(to_enter["date"])
 	to_enter["balance"] = to_enter["amount"]
+	current_dt = dt2str(datetime.datetime.now())
+	to_enter['meta'] = {"created": current_dt, "updated": current_dt}
 	# try:
 	with open(DATA_DIR+to_enter["id"]+".json", 'w', encoding = "utf-8") as f:
 		json.dump(to_enter, f, ensure_ascii=False, indent = 4)#, default = dt2str)
@@ -251,6 +254,43 @@ def account_view():
 		view_id = view_id,
 		initial_debt_payment = debt_payment
 	)
+
+
+# ACCOUNT ENDPOINTS -----------------------------------------------------------------------------
+
+
+# Get all accounts
+@bottle.route('/accounts')
+def get_all_accounts():
+	bottle.response.headers['Content-Type'] = 'application/json'
+	bottle.response.headers['Cache-Control'] = 'no-cache'
+	return json.dumps({
+		"config": legacy_config
+    })
+
+# Add account
+@bottle.post('/account')
+def update_account():
+	data = bottle.request.json
+	print(data)
+	if data['id'] != "":
+		bottle.response.status = 404
+		return
+		# for config in configurations:
+		# 	if config[0]["id"] == data['id']:
+		# 		config[0]['debt_payment'] = data["debt_payment"]
+		# 		break
+		# with open(CONFIG_DIR + data['id'] + '.json', 'w') as file:
+		# 	json.dump(data, file, ensure_ascii=False, indent = 4)
+	else:
+		data["id"] = str(uuid4())
+		filename = data["id"] + ".json"
+		configurations.append( (data, filename) )
+		# this writes a file even if error - should not do this in future
+		with open(CONFIG_DIR + filename, 'w') as file:
+			json.dump(data, file, ensure_ascii=False, indent = 4)
+	
+	return 'success'
 
 @bottle.post('/update_debt_payment')
 def update_debt_payment():
@@ -590,8 +630,9 @@ def monthly_expense_new_entry():
 
 bottle.BaseRequest.MEMFILE_MAX = MAX_MEM_FILE
 
-
-bottle.run(host = 'localhost', port = PORT)
+RUNHOST = 'localhost'
+# RUNHOST = '192.168.1.220'
+bottle.run(host = RUNHOST, port = PORT)
 
 # CLEAN UP -------------------------------------------------------------------
 
