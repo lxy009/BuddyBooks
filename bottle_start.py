@@ -40,6 +40,13 @@ entries = [json.load(open(DATA_DIR+x)) for x in entry_files if x[0] != "."]
 
 account_files = os.listdir(ACCTS_DIR)
 accounts = [(json.load(open(ACCTS_DIR+x)),x) for x in account_files]
+#  for backwards compatabilitiy
+expense_accounts = [acc[0] for acc in accounts]
+expense_account_names = [acc["value"] for acc in expense_accounts]
+for cfg in legacy_config["payment_methods"]:
+	if cfg["value"] not in expense_account_names:
+		expense_accounts.append(cfg)
+expense_accounts = sorted(expense_accounts, key = lambda x: x['label'])
 
 budget_files, budget_entries = get_files(BUDGET_DIR)
 # for legacy data
@@ -221,7 +228,8 @@ def account_view():
 	payment_method = bottle.request.query.cat if bottle.request.query.cat else legacy_config['payment_methods'][0]["value"]
 
     # for backwards compatibility -- future all configuration in separate json and with uuid
-	label = next(o for o in legacy_config["payment_methods"] if o['value'] == payment_method)['label']
+	# label = next(o for o in legacy_config["payment_methods"] if o['value'] == payment_method)['label']
+	label  = next(o for o in expense_accounts if o['value'] == payment_method)['label']
 	selected_view = [x for x in entries if 'payment_method' in x and x['payment_method'] == payment_method]
 	selected_view.sort(key = lambda x: x["date"], reverse = False)
 	for acct in [acct[0] for acct in accounts]:
@@ -247,7 +255,8 @@ def account_view():
 	return bottle.template(
 		'account',
 		items = selected_view, 
-		config = legacy_config, 
+		config = legacy_config,
+		accounts = expense_accounts,
 		selected = label, 
 		value_selected = payment_method,
 		view_id = view_id,
