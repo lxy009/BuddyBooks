@@ -44,7 +44,9 @@
     .month_row td:first-child {
       text-align: center;
     } */
-    
+    #add_button {
+      display: none;
+    }
   </style>
     <script>
         var global = {};
@@ -69,10 +71,10 @@
 <body>
   <a href='/'>Home</a>
   <div id="action_panel">
-    <!-- <button class="btn btn-success" type="button" data-toggle="modal" data-target="#add_modal">
-      Add Budget Entry
+    <button class="btn btn-success" type="button" data-toggle="modal" data-target="#edit_modal" onclick="edit_for_add()">
+      Add Account
     </button>
-    <button class="btn btn-success" type="button">New Month</button>
+    <!-- <button class="btn btn-success" type="button">New Month</button>
     <button class="btn btn-success" type="button">Clean up</button>
     <button class="btn btn-success" type="button">save</button> 
     <p>or control-s</p> -->
@@ -170,7 +172,7 @@
           </div>
           <div class="row_form">
             <span>Value:</span>
-            <div id="edit_input_value"><input class="text_input" type='text' name='label' id="edit_value" disabled/></div>
+            <div id="edit_input_value"><input class="text_input" type='text' name='value' id="edit_value" disabled/></div>
           </div>
           <div class="row_form">
             <span>Debt Payment:</span>
@@ -186,8 +188,9 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-danger" onclick="del_entry()">Delete</button>
-          <input type="submit" class="btn btn-primary" value="Submit"/>
+          <!-- <button type="button" class="btn btn-danger" onclick="del_entry()">Delete</button> -->
+          <input id="edit_button" data-type="edit" type="submit" class="btn btn-primary" value="Submit"/>
+          <input id="add_button" data-type="add" type="submit" class="btn btn-success" value="Add"/>
         </div>
       </form></div>
     </div>
@@ -381,13 +384,27 @@
 
     // };
 
+    function edit_for_add() {
+      document.getElementById("add_button").style.display = "inline-block";
+      document.getElementById("edit_button").style.display = "none";
+      document.getElementById("edit_value").disabled = false
+      $('#edit_label').val("");
+      $('#edit_value').val("");
+      $('#edit_debt_payment').val("");
+      global.switch = "add"
+    }
+
     function edit_entry(event){
+      global.switch = "edit"
       global.current_id = event.dataset.id
       entry = global.accounts.find( elem => elem.id == event.dataset.id)
       $('#edit_modal').modal('show');
       $('#edit_label').val(entry.label);
       $('#edit_value').val(entry.value);
       $('#edit_debt_payment').val(entry.debt_payment);
+      document.getElementById("edit_value").disabled = true
+      document.getElementById("add_button").style.display = "none";
+      document.getElementById("edit_button").style.display = "inline-block";
       // $('#edit_date').val(entry.date)
       // change_edit_input({"target": {"value": entry.type}}, entry.item)
       // $('#edit_in_flight_toggle').prop( "checked", entry.in_flight)
@@ -395,41 +412,76 @@
 
     function submit_edit(event){
       event.preventDefault();
-      const payload = parse_form_payload(event.target);
-      payload.id = global.current_id;
-      fetch(global.api.account + "/" + global.current_id, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify(payload)
-      })
-      .then( response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error, status = ${response.status}`);
-        }
-        $('.modal_error_message').text("").removeClass("alert alert-danger")
-        $('#edit_modal').modal('hide');
-        event.target.reset();
-        // change_edit_input({"target": {"value": "reset"}})
-        return response.json();
-      })
-      .then( data => {
-        for(var i = 0; i < global.accounts.length; i++) {
-          if (global.accounts[i].id == global.current_id) {
-            global.accounts[i] = { ...global.accounts[i] , ...payload }
-            break
-          }  
-        }
-        create_view()
-        global.current_id = ""
-      })
-      .catch( (error) => {
-        console.log("error");
-        console.log(error);
-      })
-
+      if(global.switch == 'edit'){
+        const payload = parse_form_payload(event.target);
+        payload.id = global.current_id;
+        fetch(global.api.account + "/" + global.current_id, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify(payload)
+        })
+        .then( response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error, status = ${response.status}`);
+          }
+          $('.modal_error_message').text("").removeClass("alert alert-danger")
+          $('#edit_modal').modal('hide');
+          event.target.reset();
+          // change_edit_input({"target": {"value": "reset"}})
+          return response.json();
+        })
+        .then( data => {
+          for(var i = 0; i < global.accounts.length; i++) {
+            if (global.accounts[i].id == global.current_id) {
+              global.accounts[i] = { ...global.accounts[i] , ...payload }
+              break
+            }  
+          }
+          create_view()
+          global.current_id = ""
+        })
+        .catch( (error) => {
+          console.log("error");
+          console.log(error);
+        })
+      } else {
+        const payload = parse_form_payload(event.target);
+        console.log(payload)
+        fetch(global.api.account, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify(payload)
+        })
+        .then( response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error, status = ${response.status}`);
+          }
+          $('.modal_error_message').text("").removeClass("alert alert-danger")
+          document.getElementById("add_button").display = "none";
+          document.getElementById("edit_button").display = "inline-block";
+          document.getElementById("edit_value").disabled = true
+          $('#edit_modal').modal('hide');
+          event.target.reset();
+          // change_edit_input({"target": {"value": "reset"}})
+          return response.json();
+        })
+        .then( data => {
+          console.log(data)
+          global.accounts.push(data)
+          create_view()
+          global.current_id = ""
+        })
+        .catch( (error) => {
+          console.log("error");
+          console.log(error);
+        })
+      }
     };
 
     // function del_entry(){

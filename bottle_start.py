@@ -272,11 +272,11 @@ def get_all_accounts():
 
 # Add account
 @bottle.post('/account')
-def update_account():
+def add_account():
 	data = bottle.request.json
 	print(data)
-	if data['id'] != "":
-		bottle.response.status = 404
+	if 'id' in data:
+		bottle.response.status = 403
 		return
 		# for config in configurations:
 		# 	if config[0]["id"] == data['id']:
@@ -292,7 +292,7 @@ def update_account():
 		with open(ACCTS_DIR + filename, 'w') as file:
 			json.dump(data, file, ensure_ascii=False, indent = 4)
 	
-	return 'success'
+	return json.dumps(data)
 
 # Edit Account
 @bottle.put('/account/<id>')
