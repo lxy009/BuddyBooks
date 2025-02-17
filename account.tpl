@@ -319,7 +319,7 @@
   <div>
     <select id='payment_method' name='payment_method'>
         <option>Choose Account</option>
-        %for item in config['payment_methods']:
+        %for item in accounts:
         <!-- <a class="btn btn-primary" href="view?cat={{item['value']}}">{{item['label']}}</a> -->
         <option value='{{item['value']}}'>{{item['label']}}</option>
         %end

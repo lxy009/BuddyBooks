@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 PORT = 8888
 load_dotenv()
 DATA_DIR = os.getenv('DATA_DIR')
-CONFIG_DIR = os.getenv('CONFIG_DIR')
+ACCTS_DIR = os.getenv('CONFIG_DIR')
 BUDGET_DIR = os.getenv('BUDGET_DIR')
 
 MAX_MEM_FILE = 1024 * 1024 # to override default of 102,400
@@ -38,8 +38,15 @@ def get_files(dir):
 entry_files = os.listdir(DATA_DIR)
 entries = [json.load(open(DATA_DIR+x)) for x in entry_files if x[0] != "."]
 
-configuration_files = os.listdir(CONFIG_DIR)
-configurations = [(json.load(open(CONFIG_DIR+x)),x) for x in configuration_files]
+account_files = os.listdir(ACCTS_DIR)
+accounts = [(json.load(open(ACCTS_DIR+x)),x) for x in account_files]
+#  for backwards compatabilitiy
+expense_accounts = [acc[0] for acc in accounts]
+expense_account_names = [acc["value"] for acc in expense_accounts]
+for cfg in legacy_config["payment_methods"]:
+	if cfg["value"] not in expense_account_names:
+		expense_accounts.append(cfg)
+expense_accounts = sorted(expense_accounts, key = lambda x: x['label'])
 
 budget_files, budget_entries = get_files(BUDGET_DIR)
 # for legacy data
@@ -148,6 +155,9 @@ def delete_budget_entry(id):
 		return
 	return
 
+
+# EXPENSE ENDPOINTS -----------------------------------------------------------------------------
+
 # GET EXPENSE ENTRIES
 @bottle.get('/entry')
 def get_entries():
@@ -215,40 +225,38 @@ def delete_entry(id):
 
 @bottle.route('/view') #local host route default. next function will be run for this url request
 def account_view():
-    payment_method = bottle.request.query.cat if bottle.request.query.cat else legacy_config['payment_methods'][0]["value"]
+	payment_method = bottle.request.query.cat if bottle.request.query.cat else legacy_config['payment_methods'][0]["value"]
 
     # for backwards compatibility -- future all configuration in separate json and with uuid
-    label = next(o for o in legacy_config["payment_methods"] if o['value'] == payment_method)['label']
-    selected_view = [x for x in entries if 'payment_method' in x and x['payment_method'] == payment_method]
-    selected_view.sort(key = lambda x: x["date"], reverse = False)
-    for config in configurations:
-        # print(config)
-        if config[0]["type"] == "payment_method" and config[0]["value"] == payment_method:
-            view_id = config[0]["id"]
-            debt_payment = config[0]["debt_payment"]
-            break
-    else:
-        view_id = ""
-        debt_payment = 0
-    # method_config = {}
-	# for config in configuration:
-	# 	if config.value = ""
-
-    running = 0
-    for obj in selected_view:
-        running = running + obj['balance']
-        obj['cumulative'] = running
-        obj['show'] = {
+	# label = next(o for o in legacy_config["payment_methods"] if o['value'] == payment_method)['label']
+	label  = next(o for o in expense_accounts if o['value'] == payment_method)['label']
+	selected_view = [x for x in entries if 'payment_method' in x and x['payment_method'] == payment_method]
+	selected_view.sort(key = lambda x: x["date"], reverse = False)
+	for acct in [acct[0] for acct in accounts]:
+		if acct["value"] == payment_method:
+			view_id = acct["id"]
+			debt_payment = acct["debt_payment"]
+			label = acct["label"]
+			break
+		else:
+			view_id = ""
+			debt_payment = 0
+	running = 0
+	for obj in selected_view:
+		running = running + obj['balance']
+		obj['cumulative'] = running
+		obj['show'] = {
             "cum": "{:,.2f}".format(obj['cumulative']),
 			"bal": "{:,.2f}".format(obj['balance']),
 			"amt": "{:,.2f}".format(obj['amount']),
         }
 
     # print(json.dumps(selected_view,indent = 3))
-    return bottle.template(
+	return bottle.template(
 		'account',
 		items = selected_view, 
-		config = legacy_config, 
+		config = legacy_config,
+		accounts = expense_accounts,
 		selected = label, 
 		value_selected = payment_method,
 		view_id = view_id,
@@ -258,6 +266,9 @@ def account_view():
 
 # ACCOUNT ENDPOINTS -----------------------------------------------------------------------------
 
+@bottle.route('/account_management')
+def budget_html():
+    return bottle.static_file('accounts.html', root='./')
 
 # Get all accounts
 @bottle.route('/accounts')
@@ -265,16 +276,16 @@ def get_all_accounts():
 	bottle.response.headers['Content-Type'] = 'application/json'
 	bottle.response.headers['Cache-Control'] = 'no-cache'
 	return json.dumps({
-		"config": legacy_config
+		"accounts": [acct[0] for acct in accounts]
     })
 
 # Add account
 @bottle.post('/account')
-def update_account():
+def add_account():
 	data = bottle.request.json
 	print(data)
-	if data['id'] != "":
-		bottle.response.status = 404
+	if 'id' in data:
+		bottle.response.status = 403
 		return
 		# for config in configurations:
 		# 	if config[0]["id"] == data['id']:
@@ -285,30 +296,59 @@ def update_account():
 	else:
 		data["id"] = str(uuid4())
 		filename = data["id"] + ".json"
-		configurations.append( (data, filename) )
+		accounts.append( (data, filename) )
 		# this writes a file even if error - should not do this in future
-		with open(CONFIG_DIR + filename, 'w') as file:
+		with open(ACCTS_DIR + filename, 'w') as file:
 			json.dump(data, file, ensure_ascii=False, indent = 4)
 	
-	return 'success'
+	return json.dumps(data)
+
+# Edit Account
+@bottle.put('/account/<id>')
+def update_account_entry(id):
+    ids = [x[0]["id"] for x in accounts]
+    try:
+        print(id not in ids)
+        if id not in ids:
+            raise KeyError
+        data = bottle.request.json
+        if data['id'] != id:
+            print('id doesnt match path')
+            raise ValueError
+        idx = ids.index(id)
+        print(accounts[idx])
+        new_data = accounts[idx][0]
+        new_data.update(data)
+        new_account = (new_data, accounts[idx][1])
+        accounts[idx] = new_account
+        with open(ACCTS_DIR+id+".json", 'w', encoding = 'utf-8') as f:
+            json.dump(new_data, f, ensure_ascii = False, indent = 4)
+    except KeyError:
+        bottle.response.status = 404
+        return
+    except ValueError:
+        bottle.response.status = 400
+        return
+    bottle.response.headers['Content-Type'] = 'application/json'
+    return	json.dumps({"id": id})
 
 @bottle.post('/update_debt_payment')
 def update_debt_payment():
 	data = bottle.request.json
 	# print(data)
 	if data['id'] != "":
-		for config in configurations:
-			if config[0]["id"] == data['id']:
-				config[0]['debt_payment'] = data["debt_payment"]
+		for acct in accounts:
+			if acct[0]["id"] == data['id']:
+				acct[0]['debt_payment'] = data["debt_payment"]
 				break
-		with open(CONFIG_DIR + data['id'] + '.json', 'w') as file:
+		with open(ACCTS_DIR + data['id'] + '.json', 'w') as file:
 			json.dump(data, file, ensure_ascii=False, indent = 4)
 	else:
 		data["id"] = str(uuid4())
 		filename = data["id"] + ".json"
-		configurations.append( (data, filename) )
+		accounts.append( (data, filename) )
 		# this writes a file even if error - should not do this in future
-		with open(CONFIG_DIR + filename, 'w') as file:
+		with open(ACCTS_DIR + filename, 'w') as file:
 			json.dump(data, file, ensure_ascii=False, indent = 4)
 	
 	return 'success'
