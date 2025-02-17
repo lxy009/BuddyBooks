@@ -169,6 +169,10 @@
             <div id="edit_input_label"><input class="text_input" type='text' name='label' id="edit_label"/></div>
           </div>
           <div class="row_form">
+            <span>Value:</span>
+            <div id="edit_input_value"><input class="text_input" type='text' name='label' id="edit_value" disabled/></div>
+          </div>
+          <div class="row_form">
             <span>Debt Payment:</span>
               <!-- <textarea id='edit_debt_payment' name='debt_payment' class='formula_entry'></textarea> -->
             <input type="number" name="debt_payment" id="edit_debt_payment" min="0" step="0.01"/>
@@ -380,9 +384,9 @@
     function edit_entry(event){
       global.current_id = event.dataset.id
       entry = global.accounts.find( elem => elem.id == event.dataset.id)
-      console.log(entry)
       $('#edit_modal').modal('show');
       $('#edit_label').val(entry.label);
+      $('#edit_value').val(entry.value);
       $('#edit_debt_payment').val(entry.debt_payment);
       // $('#edit_date').val(entry.date)
       // change_edit_input({"target": {"value": entry.type}}, entry.item)
@@ -412,7 +416,6 @@
         return response.json();
       })
       .then( data => {
-        console.log(data);
         for(var i = 0; i < global.accounts.length; i++) {
           if (global.accounts[i].id == global.current_id) {
             global.accounts[i] = { ...global.accounts[i] , ...payload }
