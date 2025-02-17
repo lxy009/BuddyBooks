@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<!-- bootstrap -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+  <style>
+    * {
+	    font-family: Arial, sans-serif;
+	  }
+    .row_form {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .text_input {
+      width: 400px;
+    }
+    .accounting {
+      display: flex;
+      justify-content: space-between;
+      max-width: 140px;
+    }
+    .negative {
+      color: red;
+    }
+    /* .in_flight {
+      background: yellow;
+    } */
+    .formula_entry {
+      width: 300px;
+      height: 3.3lh;
+    }
+    /* .month_row {
+      background: #444;
+      color: white;
+    }
+    .month_row td:first-child {
+      text-align: center;
+    } */
+    
+  </style>
+    <script>
+        var global = {};
+        global.api = {
+          "accounts": "/accounts",
+          "account": "/account"
+        }
+        // global.api_add = "/budget_entry";
+        // global.api_del = global.api_add + "/";
+        // global.api_update = global.api_del;
+        // global.the_data = [];
+        global.accounts = [];
+
+        var as_accounting = function(x){
+          var class_name = x < 0 ? " class='negative' " : ""
+          return "<div class='accounting'><div>$ &nbsp;</div><div" + class_name + ">" +
+              x.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + 
+              "</div></div>"
+        }
+    </script>
+</head>
+<body>
+  <a href='/'>Home</a>
+  <div id="action_panel">
+    <!-- <button class="btn btn-success" type="button" data-toggle="modal" data-target="#add_modal">
+      Add Budget Entry
+    </button>
+    <button class="btn btn-success" type="button">New Month</button>
+    <button class="btn btn-success" type="button">Clean up</button>
+    <button class="btn btn-success" type="button">save</button> 
+    <p>or control-s</p> -->
+  </div>
+  <div id='table_holder' class="container">
+	  <table id='data_content' class='table table-sm table-hover'>
+      <thead>
+        <tr>
+          <th>Account</th><th>Debt Payment</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+	  </table>
+  </div>
+
+  <!-- Add Entry Modal -->
+  <!-- <div class="modal fade" id="add_modal" tabindex="-1" role="dialog" aria-labelledby="add_modal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content"><form id='budget_form'>
+        <div class="modal-header">
+          <h5 class="modal-title" id="add_modal_title">Add Budget Entry</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="modal_error_message"></div>
+          <div class="row_form">
+            <span>Type:</span>
+            <select id="entry_type" name="type">
+              <option value=""></option>
+              <option value="deposit">deposit</option>
+              <option value="category_bucket">category bucket</option>
+              <option value="other_bucket">other bucket</option>
+              <option value="direct">direct debit</option>
+            </select>
+            </div>
+            <div class="row_form">
+              <span>Amount:</span>
+                <textarea name='entry'></textarea>
+            </div>
+            <div class="row_form">
+              <span>Date:</span>
+              <input type='date' name='date' />
+            </div>
+            <div class="row_form">
+              <span>Item:</span>
+              <div id="input_item"><input class="text_input" type='text' name='item' /></div>
+            </div>
+            <div class="row_form">
+              <div class="custom-control custom-switch">
+                <input type="checkbox" class="custom-control-input" id="in_flight_toggle" name="in_flight">
+                <label class="custom-control-label" for="in_flight_toggle">In Flight</label>
+              </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <input type="submit" class="btn btn-primary" value="Submit"/>
+        </div>
+      </form></div>
+    </div>
+  </div> -->
+
+  <!-- Edit Entry Modal -->
+  <div class="modal fade" id="edit_modal" tabindex="-1" role="dialog" aria-labelledby="add_modal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content"><form id='account_edit'>
+        <div class="modal-header">
+          <h5 class="modal-title" id="edit_modal_title">Edit Account</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="modal_error_message"></div>
+          <!-- <div class="row_form">
+            <span>Type:</span>
+            <select id="edit_entry_type" name="type">
+              <option value=""></option>
+              <option value="deposit">deposit</option>
+              <option value="category_bucket">category bucket</option>
+              <option value="other_bucket">other bucket</option>
+              <option value="direct">direct debit</option>
+            </select>
+          </div> -->
+            <!-- <div class="row_form">
+              <span>Date:</span>
+              <input id="edit_date" type='date' name='date' />
+            </div> -->
+          <div class="row_form">
+            <span>Label:</span>
+            <div id="edit_input_label"><input class="text_input" type='text' name='label' id="edit_label"/></div>
+          </div>
+          <div class="row_form">
+            <span>Debt Payment:</span>
+              <!-- <textarea id='edit_debt_payment' name='debt_payment' class='formula_entry'></textarea> -->
+            <input type="number" name="debt_payment" id="edit_debt_payment" min="0" step="0.01"/>
+          </div>
+            <!-- <div class="row_form">
+              <div class="custom-control custom-switch">
+                <input type="checkbox" class="custom-control-input" id="edit_in_flight_toggle" name="in_flight">
+                <label class="custom-control-label" for="edit_in_flight_toggle">In Flight</label>
+              </div>
+            </div> -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-danger" onclick="del_entry()">Delete</button>
+          <input type="submit" class="btn btn-primary" value="Submit"/>
+        </div>
+      </form></div>
+    </div>
+  </div>
+
+
+
+
+  <script>
+    fetch(global.api.accounts)
+        .then( response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error, status = ${response.status}`);
+            }
+            return response.json();
+        })
+        .then( data => {
+          // global.categories = data.config.categories.map( elem => {
+          //   return {
+          //     "value": elem.value,
+          //     "label": elem.label
+          //   }
+          // })
+          global.accounts = data.accounts;
+          // global.running = [0] //future will be start value
+          create_view()
+          console.log(global)
+        })
+        .catch( (error) => {
+            console.log("error");
+            console.log(error);
+        })
+
+
+    // var form = document.getElementById('budget_form');
+    // form.addEventListener("submit", submit_new_entry);
+    var form_edit = document.getElementById('account_edit');
+    form_edit.addEventListener("submit", submit_edit);
+    // var cond_input = document.getElementById('entry_type');
+    // cond_input.addEventListener("change", change_input)
+    // var cond_edit_input = document.getElementById('edit_entry_type');
+    // cond_edit_input.addEventListener("change", change_edit_input)
+
+    function create_view(){
+
+      //sort by label
+      global.accounts.sort( (a, b) => {
+        return a.label.toLowerCase() < b.label.toLowerCase() ? -1 : 1;
+      })
+
+      // create view
+      const tbody = document.getElementById('data_content').children[0];
+      tbody.innerHTML = ""; // clean view
+      global.accounts.forEach( (datum, i) => {
+        tbody.appendChild( create_view_row(datum.id, datum.label, datum.debt_payment) )
+      });
+    }
+
+    function create_view_row(id, account, debt_payment) {
+      const new_row = document.createElement("tr");
+      new_row.setAttribute("onclick","edit_entry(this)")
+      new_row.setAttribute('data-id', id)
+
+      new_row
+          .appendChild(document.createElement("td"))
+          .appendChild(document.createTextNode(account))
+
+      // if(amount == ""){
+      //   new_row.appendChild(document.createElement("td"))
+      // }else{
+      //   const show_amount = document.createElement("td");
+      //   show_amount.innerHTML = as_accounting(amount)
+      //   new_row.appendChild(show_amount)
+      // }
+
+      const dp = document.createElement("td")
+      dp.innerHTML = as_accounting(debt_payment)
+      new_row.appendChild(dp)
+
+      return(new_row)
+    }
+
+
+    // function change_input(event){
+    //   var input_switch = document.getElementById("input_item");
+    //   var selected = event.target.value;
+    //   input_switch.innerHTML = "";
+    //   if (selected == 'category_bucket') {
+    //     var select_element = document.createElement("select");
+    //     select_element.setAttribute("name", "item")
+    //     global.categories.forEach( elem => {
+    //       var option_element = document.createElement("option")
+    //       option_element.setAttribute("value", elem.value)
+    //       select_element
+    //         .appendChild( option_element )
+    //         .appendChild( document.createTextNode(elem.label) )
+    //     });
+    //     input_switch.appendChild(select_element)
+    //   } else {
+    //     var text_input = document.createElement("input")
+    //     text_input.setAttribute("class", "text_input")
+    //     text_input.setAttribute("type", "text")
+    //     text_input.setAttribute("name", "item")
+    //     input_switch.appendChild( text_input );
+    //   }
+    // }
+
+    // function change_edit_input(event, value = ""){
+    //   var input_switch = document.getElementById("edit_input_label");
+    //   var selected = event.target.value;
+    //   input_switch.innerHTML = "";
+    //   if (selected == 'category_bucket') {
+    //     var select_element = document.createElement("select");
+    //     select_element.setAttribute("name", "item")
+    //     global.categories.forEach( elem => {
+    //       var option_element = document.createElement("option")
+    //       option_element.setAttribute("value", elem.value)
+    //       select_element
+    //         .appendChild( option_element )
+    //         .appendChild( document.createTextNode(elem.label) )
+    //     });
+    //     if (value != "") select_element.value = value;
+    //     input_switch.appendChild(select_element)
+    //   } else {
+    //     var text_input = document.createElement("input")
+    //     text_input.setAttribute("class", "text_input")
+    //     text_input.setAttribute("type", "text")
+    //     text_input.setAttribute("name", "item")
+    //     if( value != "") text_input.setAttribute("value", value)
+    //     input_switch.appendChild( text_input );
+    //   }
+    // }
+
+    function parse_form_payload(event_target) {
+      const input = new FormData(event_target);
+      const payload = {}
+      for (const [name, value] of input) {
+        payload[name] = value;
+      }
+      // parse and calculate entry
+      // if (payload.debt_payment[0] == "=") { //parse as formula
+      //   try {
+      //     payload.amount = Math.round(eval(payload.debt_payment.substring(1))*100)/100 // this throws an error
+      //   } catch (e) {
+      //     $('.modal_error_message').text('formula could not be parsed').addClass("alert alert-danger")
+      //     throw new Error("formula could not be parsed")
+      //   }
+      // } else {
+      // attempt to parse as number
+      payload.debt_payment = Number(payload.debt_payment)
+      if( isNaN(payload.debt_payment) ) {
+        $('.modal_error_message').text("entry can't be parsed into a numeric value").addClass("alert alert-danger")
+        throw new Error("entry can't be parsed into a numeric value")
+      }
+      // }
+      // payload.in_flight = "in_flight" in payload ? true : false
+      return payload;
+    }
+
+    // function submit_new_entry(event){
+    //   event.preventDefault();
+    //   const payload = parse_form_payload(event.target);
+    //   fetch(global.api_add, {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       "Accept": "application/json"
+    //     },
+    //     body: JSON.stringify(payload)
+    //   })
+    //   .then( response => {
+    //     if (!response.ok) {
+    //       throw new Error(`HTTP error, status = ${response.status}`);
+    //     }
+    //     $('.modal_error_message').text("").removeClass("alert alert-danger")
+    //     $('#add_modal').modal('hide');
+    //     event.target.reset();
+    //     change_input({"target": {"value": "reset"}})
+    //     return response.json();
+    //   })
+    //   .then( data => {
+    //     console.log(data);
+    //     payload.id = data.id;
+    //     global.entries.push(payload)
+    //     create_view()
+    //   })
+    //   .catch( (error) => {
+    //     console.log("error");
+    //     console.log(error);
+    //   })
+
+    // };
+
+    function edit_entry(event){
+      global.current_id = event.dataset.id
+      entry = global.accounts.find( elem => elem.id == event.dataset.id)
+      console.log(entry)
+      $('#edit_modal').modal('show');
+      $('#edit_label').val(entry.label);
+      $('#edit_debt_payment').val(entry.debt_payment);
+      // $('#edit_date').val(entry.date)
+      // change_edit_input({"target": {"value": entry.type}}, entry.item)
+      // $('#edit_in_flight_toggle').prop( "checked", entry.in_flight)
+    }
+
+    function submit_edit(event){
+      event.preventDefault();
+      const payload = parse_form_payload(event.target);
+      payload.id = global.current_id;
+      fetch(global.api.account + "/" + global.current_id, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify(payload)
+      })
+      .then( response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error, status = ${response.status}`);
+        }
+        $('.modal_error_message').text("").removeClass("alert alert-danger")
+        $('#edit_modal').modal('hide');
+        event.target.reset();
+        // change_edit_input({"target": {"value": "reset"}})
+        return response.json();
+      })
+      .then( data => {
+        console.log(data);
+        for(var i = 0; i < global.accounts.length; i++) {
+          if (global.accounts[i].id == global.current_id) {
+            global.accounts[i] = { ...global.accounts[i] , ...payload }
+            break
+          }  
+        }
+        create_view()
+        global.current_id = ""
+      })
+      .catch( (error) => {
+        console.log("error");
+        console.log(error);
+      })
+
+    };
+
+    // function del_entry(){
+    //   console.log("DELETING")
+    //   const url = global.api_del + global.current_id;
+    //   fetch(url, {
+    //     method: "DELETE"
+    //   })
+    //   .then( response => {
+    //     if (!response.ok) {
+    //       throw new Error(`HTTP error, status = ${response.status}`);
+    //     }
+    //     $('#edit_modal').modal('hide');
+    //     $('#budget_edit')[0].reset();
+    //     change_edit_input({"target": {"value": "reset"}})
+    //     return ""
+    //   })
+    //   .then( data => {
+    //     console.log(data);
+    //     var idx = global.entries.findIndex(elem => elem.id == global.current_id)
+    //     global.entries.splice( idx, 1)
+    //     create_view()
+    //     global.current_id = "";
+    //   })
+    //   .catch( (error) => {
+    //     console.log("error");
+    //     console.log(error);
+    //   })
+    // }
+  </script>
+</body>
+
+</html>
