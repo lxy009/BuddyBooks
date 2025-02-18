@@ -241,7 +241,7 @@
                 <br />
               <div class='label'>Payment Method: </div>
                 <select id='payment_method' name='payment_method'>
-                  %for item in config['payment_methods']:
+                  %for item in accounts:
                     <option value='{{item['value']}}'>{{item['label']}}</option>
                   %end
                 </select>

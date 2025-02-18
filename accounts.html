@@ -83,7 +83,7 @@
 	  <table id='data_content' class='table table-sm table-hover'>
       <thead>
         <tr>
-          <th>Account</th><th>Debt Payment</th>
+          <th>Account</th><th>APR</th><th>Credit Limit</th><th>Debt Payment</th><th>Notes</th>
         </tr>
       </thead>
       <tbody>
@@ -174,10 +174,25 @@
             <span>Value:</span>
             <div id="edit_input_value"><input class="text_input" type='text' name='value' id="edit_value" disabled/></div>
           </div>
+          <div class="input-group mb-3">
+            <label for="edit_limit" class="form-label">Credit Limit:</label>
+            <span class="input-group-text">$</span>
+            <input id="edit_limit" name="limit" type="number" min="0" step="1" class="form-control" aria-label="Amount (to the nearest dollar)">
+            <span class="input-group-text">.00</span>
+          </div>
+          <div class="input-group mb-3">
+            <label for="edit_apr" class="form-label">APR:</label>
+            <input id="edit_apr" name="apr" type="number" min="0" step="0.01" class="form-control" aria-label="Percentage (2 decimal places)">
+            <span class="input-group-text">%</span>
+          </div>
           <div class="row_form">
             <span>Debt Payment:</span>
               <!-- <textarea id='edit_debt_payment' name='debt_payment' class='formula_entry'></textarea> -->
             <input type="number" name="debt_payment" id="edit_debt_payment" min="0" step="0.01"/>
+          </div>
+          <div class="row_form">
+            <span>Notes:</span>
+              <textarea id='edit_notes' name='notes' cols="380" rows="6"></textarea>
           </div>
             <!-- <div class="row_form">
               <div class="custom-control custom-switch">
@@ -242,21 +257,39 @@
       })
 
       // create view
-      const tbody = document.getElementById('data_content').children[0];
+      const tbody = document.getElementById('data_content').children[1];
       tbody.innerHTML = ""; // clean view
       global.accounts.forEach( (datum, i) => {
-        tbody.appendChild( create_view_row(datum.id, datum.label, datum.debt_payment) )
+        
+        tbody.appendChild( create_view_row(
+          datum.id, 
+          datum.label, 
+          datum.debt_payment, 
+          datum.apr ? datum.apr : "", 
+          datum.limit ? datum.limit : "",
+          datum.notes ? datum.notes : ""
+        ) )
       });
     }
 
-    function create_view_row(id, account, debt_payment) {
+    function create_view_row(id, account, debt_payment, apr, limit, notes) {
       const new_row = document.createElement("tr");
       new_row.setAttribute("onclick","edit_entry(this)")
       new_row.setAttribute('data-id', id)
 
       new_row
-          .appendChild(document.createElement("td"))
-          .appendChild(document.createTextNode(account))
+        .appendChild(document.createElement("td"))
+        .appendChild(document.createTextNode(account))
+
+      const apr_text = apr === "" ? "" : apr + "%"
+      new_row
+        .appendChild(document.createElement("td"))
+        .appendChild(document.createTextNode(apr_text))
+
+      const limit_text = limit === "" ? "&nbsp;" : as_accounting(limit)
+      const limit_td = document.createElement("td")
+      limit_td.innerHTML = limit_text
+      new_row.appendChild(limit_td)
 
       // if(amount == ""){
       //   new_row.appendChild(document.createElement("td"))
@@ -269,6 +302,10 @@
       const dp = document.createElement("td")
       dp.innerHTML = as_accounting(debt_payment)
       new_row.appendChild(dp)
+
+      new_row
+        .appendChild(document.createElement("td"))
+        .appendChild(document.createTextNode(notes))
 
       return(new_row)
     }
@@ -341,6 +378,8 @@
       // } else {
       // attempt to parse as number
       payload.debt_payment = Number(payload.debt_payment)
+      payload.apr = Number(payload.apr)
+      payload.limit = Number(payload.limit)
       if( isNaN(payload.debt_payment) ) {
         $('.modal_error_message').text("entry can't be parsed into a numeric value").addClass("alert alert-danger")
         throw new Error("entry can't be parsed into a numeric value")
@@ -391,6 +430,9 @@
       $('#edit_label').val("");
       $('#edit_value').val("");
       $('#edit_debt_payment').val("");
+      $('#edit_apr').val("");
+      $('#edit_limit').val("");
+      $('#edit_notes').val("");
       global.switch = "add"
     }
 
@@ -402,6 +444,9 @@
       $('#edit_label').val(entry.label);
       $('#edit_value').val(entry.value);
       $('#edit_debt_payment').val(entry.debt_payment);
+      $('#edit_apr').val(entry.apr ? entry.apr : "");
+      $('#edit_limit').val(entry.limit ? entry.limit : "");
+      $('#edit_notes').val(entry.notes ? entry.notes : "");
       document.getElementById("edit_value").disabled = true
       document.getElementById("add_button").style.display = "none";
       document.getElementById("edit_button").style.display = "inline-block";
@@ -449,7 +494,6 @@
         })
       } else {
         const payload = parse_form_payload(event.target);
-        console.log(payload)
         fetch(global.api.account, {
           method: "POST",
           headers: {
@@ -472,7 +516,6 @@
           return response.json();
         })
         .then( data => {
-          console.log(data)
           global.accounts.push(data)
           create_view()
           global.current_id = ""
