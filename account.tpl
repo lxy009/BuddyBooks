@@ -349,7 +349,7 @@
             </button>
         </div>
         <div id="add_item" class="collapse">
-            % include('add_entry_module.tpl', config = config)
+            % include('add_entry_module.tpl', config = config, accounts = accounts)
         </div>
         <div >
             <div>Debt payment amount:</div>
