@@ -78,6 +78,31 @@ def process_form_data(entry_form):
 def dt2str(dt: datetime):
 	return dt.strftime("%Y-%m-%d %H:%M:%S") 
 
+
+# Utility Functions ----------------------------------------------------------
+
+def get_calculated_accounts():
+	account_list = [acct[0] for acct in accounts]
+	for idx, acct in enumerate(account_list):
+		value = acct["value"]
+		entries_for_acct = [x for x in entries if "payment_method" in x and x["payment_method"] == value]
+		entries_w_meta = [x['meta']['updated'] for x in entries_for_acct if 'meta' in x]
+		if len(entries_w_meta) > 0:
+			last_updated = max(
+				entries_w_meta,
+				key = lambda x: datetime.datetime.strptime(x, "%Y-%m-%d %H:%M:%S")
+			)
+			account_list[idx]['last_updated'] = last_updated
+		else:
+			account_list[idx]['last_updated'] = ""
+	return(account_list)
+
+
+    # "meta": {
+    #     "created": "2025-02-09 20:39:37",
+    #     "updated": "2025-02-09 20:39:37"
+    # },
+
 #-----------------------------------------------------------------------------
 
 @bottle.route('/')
@@ -275,8 +300,10 @@ def budget_html():
 def get_all_accounts():
 	bottle.response.headers['Content-Type'] = 'application/json'
 	bottle.response.headers['Cache-Control'] = 'no-cache'
+	accounts_with_calculations = get_calculated_accounts()
 	return json.dumps({
-		"accounts": [acct[0] for acct in accounts]
+		# "accounts": [acct[0] for acct in accounts]
+		"accounts": accounts_with_calculations
     })
 
 # Add account
@@ -368,6 +395,7 @@ def update_payment_plan():
 			
 	# print(json.dumps(entries,indent = 3))
 	return 'success'
+
 
 
 

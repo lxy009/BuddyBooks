@@ -9,12 +9,11 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
   <script>
-      var global = {};
-      global.api_endpoint = "/budget";
-      global.api_add = "/budget_entry";
-      global.api_del = global.api_add + "/";
-      global.api_update = global.api_del;
-      global.the_data = [];
+    var global = {};
+    global.api = {
+      "accounts": "/accounts"
+    }
+    global.accounts = [];
 
     var as_accounting = function(x){
       var class_name = x < 0 ? " class='negative' " : ""
@@ -24,13 +23,93 @@
     }
   </script>
 </head>
+
+
 <body>
+
+
+
+
   <nav class="navbar navbar-dark bg-dark">
     <a href='/'>Home</a>
     <a href="/budget_view">Budget</a>
     <a href="/view">View</a>
     <a href="/account_management">Accounts</a>
   </nav>
+
+
+
+
+  <div id='table_holder' class="container">
+	  <table id='data_content' class='table table-sm table-hover'>
+      <thead>
+        <tr>
+          <th>Account</th><th>Last Updated</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+	  </table>
+  </div>
+
+
+
+  <script>
+    fetch(global.api.accounts)
+      .then( response => {
+          if (!response.ok) {
+              throw new Error(`HTTP error, status = ${response.status}`);
+          }
+          return response.json();
+      })
+      .then( data => {
+        // global.categories = data.config.categories.map( elem => {
+        //   return {
+        //     "value": elem.value,
+        //     "label": elem.label
+        //   }
+        // })
+        global.accounts = data.accounts;
+        // global.running = [0] //future will be start value
+        create_view()
+      })
+      .catch( (error) => {
+          console.log("error");
+          console.log(error);
+      })
+
+      function create_view(){
+
+    //sort by label
+    global.accounts.sort( (a, b) => {
+      return a.label.toLowerCase() < b.label.toLowerCase() ? -1 : 1;
+    })
+
+    // create view
+    const tbody = document.getElementById('data_content').children[1];
+    tbody.innerHTML = ""; // clean view
+    global.accounts.forEach( (datum, i) => {
+      
+      tbody.appendChild( create_view_row(
+        datum.label, 
+        datum.last_updated
+      ) )
+    });
+    } 
+
+    function create_view_row(label, last_updated) {
+      const new_row = document.createElement("tr");
+
+      new_row
+        .appendChild(document.createElement("td"))
+        .appendChild(document.createTextNode(label))
+      new_row
+        .appendChild(document.createElement("td"))
+        .appendChild(document.createTextNode(last_updated))
+        
+      return(new_row)
+    }
+  </script>
 </body>
 
 </html>
