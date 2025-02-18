@@ -283,16 +283,9 @@ def get_all_accounts():
 @bottle.post('/account')
 def add_account():
 	data = bottle.request.json
-	print(data)
 	if 'id' in data:
 		bottle.response.status = 403
 		return
-		# for config in configurations:
-		# 	if config[0]["id"] == data['id']:
-		# 		config[0]['debt_payment'] = data["debt_payment"]
-		# 		break
-		# with open(CONFIG_DIR + data['id'] + '.json', 'w') as file:
-		# 	json.dump(data, file, ensure_ascii=False, indent = 4)
 	else:
 		data["id"] = str(uuid4())
 		filename = data["id"] + ".json"
@@ -308,7 +301,6 @@ def add_account():
 def update_account_entry(id):
     ids = [x[0]["id"] for x in accounts]
     try:
-        print(id not in ids)
         if id not in ids:
             raise KeyError
         data = bottle.request.json
@@ -316,7 +308,6 @@ def update_account_entry(id):
             print('id doesnt match path')
             raise ValueError
         idx = ids.index(id)
-        print(accounts[idx])
         new_data = accounts[idx][0]
         new_data.update(data)
         new_account = (new_data, accounts[idx][1])
